@@ -1,5 +1,6 @@
 // src/lib/api.ts
 import { supabase } from './supabase';
+import type { Capability, Milestone, QuickWin } from '@/types';
 
 export class APIError extends Error {
   constructor(message: string, public status?: number, public code?: string) {
@@ -20,9 +21,9 @@ export async function fetchDashboardKPIs() {
     throw new APIError('Failed to fetch KPIs');
   }
 
-  const capabilities = capRes.data || [];
-  const milestones = msRes.data || [];
-  const quickWins = qwRes.data || [];
+  const capabilities = (capRes.data || []) as Pick<Capability, 'current_level' | 'target_level' | 'priority'>[];
+  const milestones = (msRes.data || []) as Pick<Milestone, 'status'>[];
+  const quickWins = (qwRes.data || []) as Pick<QuickWin, 'status'>[];
 
   const overallProgress = capabilities.reduce((sum, c) => {
     const progress = c.target_level > 1

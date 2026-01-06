@@ -105,12 +105,12 @@ export function useCreateTechnologyOption() {
     mutationFn: async (option: TechnologyOptionInsert) => {
       const { data, error } = await supabase
         .from('technology_options')
-        .insert(option)
+        .insert(option as never)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as TechnologyOption;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.technologyOptions });
@@ -129,13 +129,13 @@ export function useUpdateTechnologyOption() {
     mutationFn: async ({ id, updates }: { id: string; updates: TechnologyOptionUpdate }) => {
       const { data, error } = await supabase
         .from('technology_options')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as TechnologyOption;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.technologyOptions });
@@ -194,12 +194,12 @@ export function useCreateQoLImpact() {
     mutationFn: async (impact: QoLImpactInsert) => {
       const { data, error } = await supabase
         .from('qol_impacts')
-        .insert(impact)
+        .insert(impact as never)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as QoLImpact;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.qolImpacts });
@@ -218,13 +218,13 @@ export function useUpdateQoLImpact() {
     mutationFn: async ({ id, updates }: { id: string; updates: QoLImpactUpdate }) => {
       const { data, error } = await supabase
         .from('qol_impacts')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as QoLImpact;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.qolImpacts });
@@ -290,12 +290,12 @@ export function useCreateRoadmapPath() {
     mutationFn: async (path: RoadmapPathInsert) => {
       const { data, error } = await supabase
         .from('roadmap_paths')
-        .insert(path)
+        .insert(path as never)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as RoadmapPath;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.roadmapPaths });
@@ -314,13 +314,13 @@ export function useUpdateRoadmapPath() {
     mutationFn: async ({ id, updates }: { id: string; updates: RoadmapPathUpdate }) => {
       const { data, error } = await supabase
         .from('roadmap_paths')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as RoadmapPath;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roadmapKeys.roadmapPaths });

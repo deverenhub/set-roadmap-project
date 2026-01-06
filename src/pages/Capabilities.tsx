@@ -1,5 +1,4 @@
 // src/pages/Capabilities.tsx
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CapabilityList, CapabilityDetail } from '@/components/capabilities';
 

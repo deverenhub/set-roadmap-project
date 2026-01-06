@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Settings() {
-  const { data: user, isLoading } = useCurrentUser();
+  const { data: user } = useCurrentUser();
   const updateProfile = useUpdateProfile();
   const signOut = useSignOut();
 

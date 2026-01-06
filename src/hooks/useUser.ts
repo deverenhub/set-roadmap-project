@@ -150,7 +150,7 @@ export function useUpdateProfile() {
 
       const { data, error } = await supabase
         .from('users')
-        .update(updates)
+        .update(updates as never)
         .eq('id', session.user.id)
         .select()
         .single();
@@ -212,7 +212,7 @@ export function useUpdateUserRole() {
     mutationFn: async ({ userId, role }: { userId: string; role: UserRole }) => {
       const { data, error } = await supabase
         .from('users')
-        .update({ role })
+        .update({ role } as never)
         .eq('id', userId)
         .select()
         .single();

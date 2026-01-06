@@ -113,7 +113,7 @@ export default function MaturityDefinitions() {
       {/* Progress Indicator */}
       <div className="relative">
         <div className="flex items-center justify-between">
-          {definitions?.map((def, index) => (
+          {definitions?.map((def) => (
             <TooltipProvider key={def.id}>
               <Tooltip>
                 <TooltipTrigger asChild>

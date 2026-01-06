@@ -26,4 +26,6 @@ export const db = {
   users: () => supabase.from('users'),
   maturityDefinitions: () => supabase.from('maturity_definitions'),
   technologyOptions: () => supabase.from('technology_options'),
+  qolImpacts: () => supabase.from('qol_impacts'),
+  roadmapPaths: () => supabase.from('roadmap_paths'),
 };

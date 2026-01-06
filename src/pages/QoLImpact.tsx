@@ -63,7 +63,6 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
   BarChart,
   Bar,
   XAxis,

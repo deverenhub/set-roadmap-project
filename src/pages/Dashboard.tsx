@@ -5,8 +5,6 @@ import {
   Target,
   Zap,
   AlertTriangle,
-  Calendar,
-  Users,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchDashboardKPIs } from '@/lib/api';

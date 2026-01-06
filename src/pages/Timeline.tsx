@@ -1,10 +1,7 @@
 // src/pages/Timeline.tsx
-import { useNavigate } from 'react-router-dom';
 import { TimelineGantt } from '@/components/diagrams';
 
 export default function Timeline() {
-  const navigate = useNavigate();
-
   const handleMilestoneClick = (id: string) => {
     // Navigate to milestone detail or open modal
     console.log('Milestone clicked:', id);
