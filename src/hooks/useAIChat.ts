@@ -110,8 +110,15 @@ export function useAIChat() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get AI response');
+        let errorMessage = `HTTP ${response.status}: Failed to get AI response`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // Could not parse JSON error
+        }
+        console.error('AI Chat Error:', response.status, errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data: AIResponse = await response.json();
