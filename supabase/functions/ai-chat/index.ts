@@ -240,7 +240,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('AI Chat Error:', error);
+    console.error('AI Chat Error:', error.message, error.stack);
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -258,7 +258,7 @@ async function callClaude(apiKey: string, messages: any[], tools: any[]) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       tools,
@@ -270,8 +270,16 @@ async function callClaude(apiKey: string, messages: any[], tools: any[]) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'Claude API error');
+    const errorText = await response.text();
+    console.error('Claude API Error Response:', response.status, errorText);
+    let errorMessage = 'Claude API error';
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.error?.message || errorMessage;
+    } catch {
+      errorMessage = errorText || errorMessage;
+    }
+    throw new Error(`Claude API (${response.status}): ${errorMessage}`);
   }
 
   return await response.json();
