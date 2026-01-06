@@ -2,6 +2,60 @@
 // Voice input hook using Web Speech API
 import { useState, useCallback, useRef, useEffect } from 'react';
 
+// Web Speech API types
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface ISpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: ((this: ISpeechRecognition, ev: Event) => void) | null;
+  onresult: ((this: ISpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((this: ISpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+  onend: ((this: ISpeechRecognition, ev: Event) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+interface ISpeechRecognitionConstructor {
+  new (): ISpeechRecognition;
+}
+
+// Extend Window interface for SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: ISpeechRecognitionConstructor;
+    webkitSpeechRecognition: ISpeechRecognitionConstructor;
+  }
+}
+
 export interface VoiceInputState {
   isListening: boolean;
   transcript: string;
@@ -16,14 +70,6 @@ interface UseVoiceInputOptions {
   language?: string;
   onResult?: (transcript: string) => void;
   onError?: (error: string) => void;
-}
-
-// Extend Window interface for SpeechRecognition
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
 }
 
 export function useVoiceInput(options: UseVoiceInputOptions = {}) {
@@ -43,7 +89,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}) {
     isSupported: false,
   });
 
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
   const finalTranscriptRef = useRef<string>('');
 
   // Check for browser support

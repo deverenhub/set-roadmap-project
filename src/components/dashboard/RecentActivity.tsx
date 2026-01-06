@@ -92,7 +92,9 @@ export function RecentActivity({ limit = 5, onViewAll }: RecentActivityProps) {
               const Icon = actionIcons[activity.action as keyof typeof actionIcons] || Edit;
               const colorClass = actionColors[activity.action as keyof typeof actionColors] || 'text-slate-600 bg-slate-100';
               const userName = activity.user?.full_name || activity.user?.email || 'System';
-              const itemName = activity.new_values?.name || activity.old_values?.name || 'item';
+              const newValues = activity.new_values as Record<string, unknown> | null;
+              const oldValues = activity.old_values as Record<string, unknown> | null;
+              const itemName = (newValues?.name as string) || (oldValues?.name as string) || 'item';
 
               return (
                 <div key={activity.id} className="flex items-start gap-3">

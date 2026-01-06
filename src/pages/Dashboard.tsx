@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchDashboardKPIs } from '@/lib/api';
-import { KPICard, ProgressRing, RecentActivity, CriticalItems } from '@/components/dashboard';
+import { KPICard, ProgressRing, RecentActivity, CriticalItems, QoLImpactChart } from '@/components/dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCapabilities } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -182,6 +182,11 @@ export default function Dashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <RecentActivity limit={5} />
         <CriticalItems onItemClick={handleItemClick} />
+      </div>
+
+      {/* QoL Impact Section */}
+      <div className="grid gap-6 lg:grid-cols-1">
+        <QoLImpactChart limit={6} />
       </div>
     </div>
   );

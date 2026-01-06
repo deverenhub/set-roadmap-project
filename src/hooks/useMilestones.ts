@@ -19,6 +19,7 @@ export const milestoneKeys = {
 interface MilestoneFilters {
   capabilityId?: string | null;
   status?: string | null;
+  [key: string]: string | null | undefined;
 }
 
 // Fetch all milestones with optional filters
@@ -44,7 +45,7 @@ export function useMilestones(filters: MilestoneFilters = {}) {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as MilestoneWithCapability[];
     },
   });
 }
@@ -142,7 +143,7 @@ export function useCreateMilestone() {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all });
       queryClient.invalidateQueries({ queryKey: capabilityKeys.detail(data.capability_id) });
       toast.success('Milestone created successfully');
@@ -182,7 +183,7 @@ export function useUpdateMilestone() {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all });
       queryClient.setQueryData(milestoneKeys.detail(data.id), data);
       toast.success('Milestone updated successfully');

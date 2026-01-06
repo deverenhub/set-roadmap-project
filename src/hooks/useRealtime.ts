@@ -30,13 +30,13 @@ export function useRealtime(config: RealtimeConfig) {
     tables.forEach((table) => {
       events.forEach((event) => {
         channel = channel.on(
-          'postgres_changes',
+          'postgres_changes' as any,
           {
             event,
             schema: 'public',
             table,
-          },
-          (payload) => {
+          } as any,
+          (payload: any) => {
             // Invalidate related queries
             queryClient.invalidateQueries({ queryKey: [table] });
 

@@ -20,6 +20,7 @@ interface QuickWinFilters {
   status?: string | null;
   capabilityId?: string | null;
   category?: string | null;
+  [key: string]: string | null | undefined;
 }
 
 // Fetch all quick wins with optional filters
@@ -48,7 +49,7 @@ export function useQuickWins(filters: QuickWinFilters = {}) {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as QuickWinWithCapability[];
     },
   });
 }
@@ -76,7 +77,7 @@ export function useQuickWinsGrouped() {
         blocked: [],
       };
 
-      (data || []).forEach((qw: QuickWinWithCapability) => {
+      ((data || []) as QuickWinWithCapability[]).forEach((qw) => {
         const status = qw.status as Status;
         if (grouped[status]) {
           grouped[status].push(qw);
@@ -196,7 +197,7 @@ export function useUpdateQuickWin() {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: quickWinKeys.all });
       queryClient.setQueryData(quickWinKeys.detail(data.id), data);
       toast.success('Quick win updated successfully');

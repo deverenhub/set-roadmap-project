@@ -27,7 +27,7 @@ export function CriticalItems({ onItemClick }: CriticalItemsProps) {
         .limit(5);
 
       if (error) throw error;
-      return data;
+      return data as { id: string; name: string; capability: { id: string; name: string } | null }[];
     },
   });
 
@@ -42,7 +42,7 @@ export function CriticalItems({ onItemClick }: CriticalItemsProps) {
         .limit(5);
 
       if (error) throw error;
-      return data;
+      return data as { id: string; name: string; current_level: number; target_level: number }[];
     },
   });
 

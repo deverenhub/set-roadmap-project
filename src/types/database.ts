@@ -52,6 +52,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       milestones: {
         Row: {
@@ -111,6 +112,14 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'milestones_capability_id_fkey';
+            columns: ['capability_id'];
+            referencedRelation: 'capabilities';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       quick_wins: {
         Row: {
@@ -158,6 +167,14 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'quick_wins_capability_id_fkey';
+            columns: ['capability_id'];
+            referencedRelation: 'capabilities';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       users: {
         Row: {
@@ -184,6 +201,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       activity_log: {
         Row: {
@@ -216,6 +234,7 @@ export interface Database {
           new_values?: Json | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       chat_history: {
         Row: {
@@ -245,6 +264,7 @@ export interface Database {
           metadata?: Json | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       maturity_definitions: {
         Row: {
@@ -271,6 +291,7 @@ export interface Database {
           characteristics?: string[];
           created_at?: string;
         };
+        Relationships: [];
       };
       technology_options: {
         Row: {
@@ -324,6 +345,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       qol_impacts: {
         Row: {
@@ -359,6 +381,14 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'qol_impacts_capability_id_fkey';
+            columns: ['capability_id'];
+            referencedRelation: 'capabilities';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       roadmap_paths: {
         Row: {
@@ -418,16 +448,29 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'roadmap_paths_capability_id_fkey';
+            columns: ['capability_id'];
+            referencedRelation: 'capabilities';
+            referencedColumns: ['id'];
+          }
+        ];
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
+
+// Helper types for table rows
+export type Tables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Row'];
+
+export type InsertTables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Insert'];
+
+export type UpdateTables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Update'];

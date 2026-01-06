@@ -16,6 +16,7 @@ export const capabilityKeys = {
 interface CapabilityFilters {
   priority?: string | null;
   owner?: string | null;
+  [key: string]: string | null | undefined;
 }
 
 interface CapabilityWithCounts extends Capability {
@@ -126,7 +127,7 @@ export function useUpdateCapability() {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: capabilityKeys.all });
       queryClient.setQueryData(capabilityKeys.detail(data.id), data);
       toast.success('Capability updated successfully');

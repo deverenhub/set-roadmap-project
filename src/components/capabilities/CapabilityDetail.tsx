@@ -27,8 +27,10 @@ export function CapabilityDetail({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const { data: capability, isLoading } = useCapability(capabilityId);
-  const { data: milestones } = useMilestonesByCapability(capabilityId);
+  const { data: capabilityData, isLoading } = useCapability(capabilityId);
+  const capability = capabilityData as any;
+  const { data: milestonesData } = useMilestonesByCapability(capabilityId);
+  const milestones = milestonesData as any[];
   const deleteCapability = useDeleteCapability();
   const { canEdit, canDelete } = usePermissions();
 
