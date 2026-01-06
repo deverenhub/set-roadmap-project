@@ -67,3 +67,10 @@ export {
   formatToolResponse,
 } from './useAIChat';
 export type { ChatMessage } from './useAIChat';
+
+// Voice Input
+export {
+  useVoiceInput,
+  isSpeechRecognitionSupported,
+} from './useVoiceInput';
+export type { VoiceInputState } from './useVoiceInput';
