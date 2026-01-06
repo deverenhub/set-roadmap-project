@@ -21,6 +21,7 @@ import {
   CalendarDays,
   Map,
   ChevronDown,
+  Presentation,
 } from 'lucide-react';
 import { SETLogoIcon } from '@/components/ui/SETLogo';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Executive View', href: '/executive', icon: Presentation },
   { name: 'Capabilities', href: '/capabilities', icon: Layers },
   { name: 'Maturity Definitions', href: '/maturity-definitions', icon: Target },
   {

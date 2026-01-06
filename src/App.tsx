@@ -22,6 +22,7 @@ import QoLImpact from '@/pages/QoLImpact';
 import RoadmapInventory from '@/pages/RoadmapInventory';
 import RoadmapProduction from '@/pages/RoadmapProduction';
 import RoadmapPlanning from '@/pages/RoadmapPlanning';
+import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -60,6 +61,7 @@ function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/executive" element={<ExecutiveDashboard />} />
           <Route path="/capabilities" element={<Capabilities />} />
           <Route path="/capabilities/:id" element={<Capabilities />} />
           <Route path="/timeline" element={<Timeline />} />
