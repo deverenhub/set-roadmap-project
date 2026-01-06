@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles } from 'lucide-react';
+import { SETLogo } from '@/components/ui/SETLogo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -28,9 +28,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-set-teal-100 p-3">
-              <Sparkles className="h-8 w-8 text-set-teal-500" />
-            </div>
+            <SETLogo size="lg" />
           </div>
           <CardTitle className="text-2xl">SET VPC Roadmap</CardTitle>
           <CardDescription>
