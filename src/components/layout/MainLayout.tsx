@@ -22,6 +22,7 @@ import {
   Map,
   ChevronDown,
 } from 'lucide-react';
+import { SETLogoIcon } from '@/components/ui/SETLogo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ChatPanel } from '@/components/chat/ChatPanel';
@@ -92,7 +93,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-set-teal-400" />
+            <SETLogoIcon size={24} className="text-[#EB0A1E]" />
             <span className="font-semibold text-white">SET VPC Roadmap</span>
           </div>
           <div className="ml-auto">
@@ -123,7 +124,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           )}
         >
           <div className="flex h-16 items-center gap-2 px-4 border-b border-set-teal-800">
-            <Sparkles className="h-6 w-6 text-set-teal-400" />
+            <SETLogoIcon size={24} className="text-[#EB0A1E]" />
             <span className="font-semibold text-white">SET VPC Roadmap</span>
           </div>
           <nav className="p-4 space-y-1">
@@ -211,7 +212,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             'flex h-16 items-center border-b border-set-teal-800 px-4',
             sidebarCollapsed ? 'justify-center' : 'gap-2'
           )}>
-            <Sparkles className="h-6 w-6 text-set-teal-400 shrink-0" />
+            <SETLogoIcon size={24} className="text-[#EB0A1E] shrink-0" />
             {!sidebarCollapsed && (
               <span className="font-semibold truncate text-white">SET VPC Roadmap</span>
             )}
