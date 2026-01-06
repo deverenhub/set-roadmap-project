@@ -49,7 +49,7 @@ export function QuickWinForm({ quickWin, onSuccess, onCancel }: QuickWinFormProp
     try {
       const data = {
         ...formData,
-        capability_id: formData.capability_id || null,
+        capability_id: formData.capability_id && formData.capability_id !== 'none' ? formData.capability_id : null,
       };
 
       if (isEditing && quickWin) {
@@ -119,7 +119,7 @@ export function QuickWinForm({ quickWin, onSuccess, onCancel }: QuickWinFormProp
               <SelectValue placeholder="Select capability (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {capabilities?.map((cap) => (
                 <SelectItem key={cap.id} value={cap.id}>{cap.name}</SelectItem>
               ))}
