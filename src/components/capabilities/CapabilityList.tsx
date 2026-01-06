@@ -1,7 +1,7 @@
 // src/components/capabilities/CapabilityList.tsx
 import { useState } from 'react';
 import { Plus, Filter, Search } from 'lucide-react';
-import { useCapabilities } from '@/hooks';
+import { useCapabilities, usePermissions } from '@/hooks';
 import { CapabilityCard } from './CapabilityCard';
 import { CapabilityForm } from './CapabilityForm';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { canEdit } = usePermissions();
 
   const { data: capabilities, isLoading } = useCapabilities({
     priority: priorityFilter,
@@ -88,10 +89,12 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Capability
-        </Button>
+        {canEdit && (
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Capability
+          </Button>
+        )}
       </div>
 
       {/* Capability grid */}
@@ -103,7 +106,7 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
               ? 'Try adjusting your filters'
               : 'Get started by adding your first capability'}
           </p>
-          {!searchTerm && !priorityFilter && (
+          {!searchTerm && !priorityFilter && canEdit && (
             <Button className="mt-4" onClick={() => setIsFormOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Capability

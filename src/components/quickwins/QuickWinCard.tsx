@@ -21,6 +21,7 @@ interface QuickWinCardProps {
   };
   isDragging?: boolean;
   onClick?: () => void;
+  readOnly?: boolean;
 }
 
 const investmentColors = {
@@ -35,7 +36,7 @@ const roiColors = {
   HIGH: 'text-green-500',
 };
 
-export function QuickWinCard({ item, isDragging, onClick }: QuickWinCardProps) {
+export function QuickWinCard({ item, isDragging, onClick, readOnly = false }: QuickWinCardProps) {
   const {
     attributes,
     listeners,
@@ -62,14 +63,16 @@ export function QuickWinCard({ item, isDragging, onClick }: QuickWinCardProps) {
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-2">
-          <button
-            {...attributes}
-            {...listeners}
-            className="mt-1 p-1 -ml-1 rounded hover:bg-slate-100 cursor-grab active:cursor-grabbing"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="h-4 w-4 text-slate-400" />
-          </button>
+          {!readOnly && (
+            <button
+              {...attributes}
+              {...listeners}
+              className="mt-1 p-1 -ml-1 rounded hover:bg-slate-100 cursor-grab active:cursor-grabbing"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="h-4 w-4 text-slate-400" />
+            </button>
+          )}
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-sm leading-tight">{item.name}</h4>
             {item.description && (

@@ -18,6 +18,7 @@ import type { Status } from '@/types';
 
 interface KanbanBoardProps {
   onQuickWinClick?: (id: string) => void;
+  readOnly?: boolean;
 }
 
 const COLUMNS: { id: Status; title: string; color: string }[] = [
@@ -26,7 +27,7 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
   { id: 'completed', title: 'Completed', color: 'bg-green-100' },
 ];
 
-export function KanbanBoard({ onQuickWinClick }: KanbanBoardProps) {
+export function KanbanBoard({ onQuickWinClick, readOnly = false }: KanbanBoardProps) {
   const { data: grouped, isLoading } = useQuickWinsGrouped();
   const moveQuickWin = useMoveQuickWin();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -40,10 +41,12 @@ export function KanbanBoard({ onQuickWinClick }: KanbanBoardProps) {
   );
 
   const handleDragStart = (event: DragStartEvent) => {
+    if (readOnly) return;
     setActiveId(event.active.id as string);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (readOnly) return;
     const { active, over } = event;
     setActiveId(null);
 
@@ -122,6 +125,7 @@ export function KanbanBoard({ onQuickWinClick }: KanbanBoardProps) {
             color={column.color}
             items={grouped?.[column.id] || []}
             onItemClick={onQuickWinClick}
+            readOnly={readOnly}
           />
         ))}
       </div>

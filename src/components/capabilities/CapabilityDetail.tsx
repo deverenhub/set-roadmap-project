@@ -1,7 +1,7 @@
 // src/components/capabilities/CapabilityDetail.tsx
 import { useState } from 'react';
 import { ArrowLeft, Edit, Trash2, Plus } from 'lucide-react';
-import { useCapability, useDeleteCapability, useMilestonesByCapability } from '@/hooks';
+import { useCapability, useDeleteCapability, useMilestonesByCapability, usePermissions } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge, PriorityBadge, StatusBadge } from '@/components/ui/badge';
@@ -30,6 +30,7 @@ export function CapabilityDetail({
   const { data: capability, isLoading } = useCapability(capabilityId);
   const { data: milestones } = useMilestonesByCapability(capabilityId);
   const deleteCapability = useDeleteCapability();
+  const { canEdit, canDelete } = usePermissions();
 
   const handleDelete = async () => {
     await deleteCapability.mutateAsync(capabilityId);
@@ -83,16 +84,22 @@ export function CapabilityDetail({
             )}
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsEditOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
-          <Button variant="destructive" onClick={() => setIsDeleteOpen(true)}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-          </Button>
-        </div>
+        {(canEdit || canDelete) && (
+          <div className="flex gap-2">
+            {canEdit && (
+              <Button variant="outline" onClick={() => setIsEditOpen(true)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
+            {canDelete && (
+              <Button variant="destructive" onClick={() => setIsDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Overview Cards */}
@@ -150,10 +157,12 @@ export function CapabilityDetail({
         <TabsContent value="milestones" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Milestones</h3>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Milestone
-            </Button>
+            {canEdit && (
+              <Button size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Milestone
+              </Button>
+            )}
           </div>
           {milestones?.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">

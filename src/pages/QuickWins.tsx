@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { KanbanBoard, QuickWinForm } from '@/components/quickwins';
-import { useQuickWinStats } from '@/hooks';
+import { useQuickWinStats, usePermissions } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function QuickWins() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data: stats, isLoading } = useQuickWinStats();
+  const { canEdit } = usePermissions();
 
   const handleQuickWinClick = (id: string) => {
     // Open quick win detail modal
@@ -26,10 +27,12 @@ export default function QuickWins() {
             Track short-term initiatives and improvements
           </p>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Quick Win
-        </Button>
+        {canEdit && (
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Quick Win
+          </Button>
+        )}
       </div>
 
       {/* Stats cards */}
@@ -75,7 +78,7 @@ export default function QuickWins() {
       </div>
 
       {/* Kanban board */}
-      <KanbanBoard onQuickWinClick={handleQuickWinClick} />
+      <KanbanBoard onQuickWinClick={handleQuickWinClick} readOnly={!canEdit} />
 
       {/* Add form dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

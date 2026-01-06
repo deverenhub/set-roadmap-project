@@ -13,6 +13,7 @@ interface KanbanColumnProps {
   color: string;
   items: any[];
   onItemClick?: (id: string) => void;
+  readOnly?: boolean;
 }
 
 export function KanbanColumn({
@@ -21,6 +22,7 @@ export function KanbanColumn({
   color,
   items,
   onItemClick,
+  readOnly = false,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -52,11 +54,12 @@ export function KanbanColumn({
               key={item.id}
               item={item}
               onClick={() => onItemClick?.(item.id)}
+              readOnly={readOnly}
             />
           ))}
           {items.length === 0 && (
             <div className="flex items-center justify-center h-24 border-2 border-dashed border-slate-300 rounded-lg text-sm text-slate-400">
-              Drop items here
+              {readOnly ? 'No items' : 'Drop items here'}
             </div>
           )}
         </div>
