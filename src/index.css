@@ -1,0 +1,176 @@
+/* src/index.css */
+/* SET VPC Roadmap - JM Family / Southeast Toyota Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* SET/JM Family Brand Colors */
+    --set-teal: 185 100% 30%;           /* #008C99 - Primary brand teal */
+    --set-teal-dark: 185 100% 28%;      /* #00838F - Darker teal */
+    --set-teal-light: 185 35% 83%;      /* #C2E2E5 - Light teal background */
+    --set-dark: 195 26% 15%;            /* #1D2C31 - Dark background */
+    --set-gray: 0 0% 20%;               /* #333333 - Dark text */
+    --set-red: 348 83% 47%;             /* #EB1C2D - Toyota Red accent */
+
+    /* Light Theme - SET Brand */
+    --background: 0 0% 100%;
+    --foreground: 195 26% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 195 26% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 195 26% 15%;
+    --primary: 185 100% 30%;            /* SET Teal */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 185 35% 93%;           /* Light teal */
+    --secondary-foreground: 195 26% 15%;
+    --muted: 185 20% 96%;
+    --muted-foreground: 195 10% 45%;
+    --accent: 185 35% 90%;
+    --accent-foreground: 195 26% 15%;
+    --destructive: 348 83% 47%;         /* Toyota Red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 185 20% 90%;
+    --input: 185 20% 90%;
+    --ring: 185 100% 30%;
+    --radius: 0.5rem;
+
+    /* Typography */
+    --font-heading: 'Inter', 'Proxima Nova', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Source Sans 3', 'Freight Text Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .dark {
+    /* Dark Theme - SET Brand */
+    --background: 195 26% 10%;          /* Darker SET dark */
+    --foreground: 185 20% 95%;
+    --card: 195 26% 13%;
+    --card-foreground: 185 20% 95%;
+    --popover: 195 26% 13%;
+    --popover-foreground: 185 20% 95%;
+    --primary: 185 100% 40%;            /* Brighter teal for dark mode */
+    --primary-foreground: 195 26% 10%;
+    --secondary: 195 26% 18%;
+    --secondary-foreground: 185 20% 95%;
+    --muted: 195 26% 18%;
+    --muted-foreground: 185 15% 60%;
+    --accent: 195 26% 20%;
+    --accent-foreground: 185 20% 95%;
+    --destructive: 348 83% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 195 26% 20%;
+    --input: 195 26% 20%;
+    --ring: 185 100% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Custom animations */
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* React Flow customizations */
+.react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__minimap {
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius);
+}
+
+/* Recharts customizations */
+.recharts-tooltip-wrapper {
+  z-index: 100;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
