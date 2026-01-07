@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks';
-import { useApplyPreferences } from '@/stores/preferencesStore';
+import { useApplyPreferences, usePreferencesStore } from '@/stores/preferencesStore';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { FullPageLoader } from '@/components/shared/LoadingSpinner';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
@@ -24,6 +24,21 @@ import RoadmapInventory from '@/pages/RoadmapInventory';
 import RoadmapProduction from '@/pages/RoadmapProduction';
 import RoadmapPlanning from '@/pages/RoadmapPlanning';
 import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
+
+// Component to handle default view preference redirect
+function DefaultViewRoute() {
+  const defaultView = usePreferencesStore((state) => state.preferences.defaultDashboardView);
+
+  switch (defaultView) {
+    case 'capabilities':
+      return <Navigate to="/capabilities" replace />;
+    case 'timeline':
+      return <Navigate to="/timeline" replace />;
+    case 'overview':
+    default:
+      return <Dashboard />;
+  }
+}
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -64,7 +79,7 @@ function App() {
     <ErrorBoundary>
       <MainLayout>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<DefaultViewRoute />} />
           <Route path="/executive" element={<ExecutiveDashboard />} />
           <Route path="/capabilities" element={<Capabilities />} />
           <Route path="/capabilities/:id" element={<Capabilities />} />
