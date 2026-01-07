@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks';
+import { useApplyPreferences } from '@/stores/preferencesStore';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { FullPageLoader } from '@/components/shared/LoadingSpinner';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
@@ -27,6 +28,9 @@ import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Apply user preferences (theme, compact mode)
+  useApplyPreferences();
 
   // Enable realtime sync when authenticated
   useRealtimeSync();

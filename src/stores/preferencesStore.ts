@@ -91,22 +91,34 @@ export const usePreferencesStore = create<PreferencesState>()(
   )
 );
 
-// Hook to apply theme
-export function useApplyTheme() {
+// Hook to apply theme and compact mode
+export function useApplyPreferences() {
   const theme = usePreferencesStore((state) => state.preferences.theme);
+  const compactMode = usePreferencesStore((state) => state.preferences.compactMode);
 
   // Apply theme to document
   if (typeof window !== 'undefined') {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
 
+    // Apply theme
+    root.classList.remove('light', 'dark');
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       root.classList.add(systemTheme);
     } else {
       root.classList.add(theme);
     }
+
+    // Apply compact mode
+    if (compactMode) {
+      root.classList.add('compact');
+    } else {
+      root.classList.remove('compact');
+    }
   }
 
-  return theme;
+  return { theme, compactMode };
 }
+
+// Legacy alias for backwards compatibility
+export const useApplyTheme = useApplyPreferences;

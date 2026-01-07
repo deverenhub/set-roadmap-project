@@ -30,3 +30,4 @@ coverage/
 *.tsbuildinfo
 .eslintcache
 .vercel
+supabase/.temp/
