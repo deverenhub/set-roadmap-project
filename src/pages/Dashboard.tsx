@@ -12,13 +12,26 @@ import { KPICard, ProgressRing, RecentActivity, CriticalItems, QoLImpactChart } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCapabilities } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePreferencesStore } from '@/stores/preferencesStore';
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  // Get dashboard preferences
+  const preferences = usePreferencesStore((state) => state.preferences);
+  const {
+    showQuickWinsOnDashboard,
+    showRecentActivityOnDashboard,
+    dashboardRefreshInterval
+  } = preferences;
+
+  // Convert refresh interval to milliseconds (0 = disabled)
+  const refetchInterval = dashboardRefreshInterval > 0 ? dashboardRefreshInterval * 1000 : false;
+
   const { data: kpis, isLoading: kpisLoading } = useQuery({
     queryKey: ['dashboardKPIs'],
     queryFn: fetchDashboardKPIs,
+    refetchInterval, // Auto-refresh based on preference
   });
 
   const { data: capabilities, isLoading: capsLoading } = useCapabilities();
@@ -57,14 +70,16 @@ export default function Dashboard() {
           isLoading={kpisLoading}
           onClick={() => navigate('/timeline')}
         />
-        <KPICard
-          title="Quick Wins"
-          value={`${kpis?.completedQuickWins || 0}/${kpis?.totalQuickWins || 0}`}
-          subtitle="completed"
-          icon={Zap}
-          isLoading={kpisLoading}
-          onClick={() => navigate('/quick-wins')}
-        />
+        {showQuickWinsOnDashboard && (
+          <KPICard
+            title="Quick Wins"
+            value={`${kpis?.completedQuickWins || 0}/${kpis?.totalQuickWins || 0}`}
+            subtitle="completed"
+            icon={Zap}
+            isLoading={kpisLoading}
+            onClick={() => navigate('/quick-wins')}
+          />
+        )}
         <KPICard
           title="Critical Items"
           value={kpis?.blockedMilestones || 0}
@@ -179,8 +194,8 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <RecentActivity limit={5} />
+      <div className={`grid gap-6 ${showRecentActivityOnDashboard ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`}>
+        {showRecentActivityOnDashboard && <RecentActivity limit={5} />}
         <CriticalItems onItemClick={handleItemClick} />
       </div>
 
