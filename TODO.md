@@ -1,9 +1,5 @@
 # SET Roadmap Platform - To Do List
 
-## In Progress
-
-- [ ] **PDF Export for Executive Reports** - Custom branded PDF with SET logo, application colors, and valuable executive summary data
-
 ## Pending Features
 
 ### High Priority
@@ -21,6 +17,7 @@
 
 ## Completed
 
+- [x] **PDF Export for Executive Reports** - Custom branded PDF with SET logo, application colors, and comprehensive executive summary
 - [x] **Comments System** - Threaded comments on capabilities, milestones, and quick wins
 - [x] **Notifications System** - Real-time in-app notifications with bell icon
 - [x] **Milestone Detail Modal** - Full milestone view with status change buttons
