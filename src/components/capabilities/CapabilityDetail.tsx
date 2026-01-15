@@ -1,6 +1,6 @@
 // src/components/capabilities/CapabilityDetail.tsx
 import { useState } from 'react';
-import { ArrowLeft, Edit, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Plus, ChevronRight } from 'lucide-react';
 import { useCapability, useDeleteCapability, useMilestonesByCapability, usePermissions } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CapabilityForm } from './CapabilityForm';
 import { MaturityIndicator } from './MaturityIndicator';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { CommentSection } from '@/components/comments';
+import { MilestoneDetailModal } from '@/components/timeline';
+import { QuickWinDetailModal } from '@/components/quickwins';
 
 interface CapabilityDetailProps {
   capabilityId: string;
@@ -26,6 +29,10 @@ export function CapabilityDetail({
 }: CapabilityDetailProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
+  const [isMilestoneDetailOpen, setIsMilestoneDetailOpen] = useState(false);
+  const [selectedQuickWinId, setSelectedQuickWinId] = useState<string | null>(null);
+  const [isQuickWinDetailOpen, setIsQuickWinDetailOpen] = useState(false);
 
   const { data: capabilityData, isLoading } = useCapability(capabilityId);
   const capability = capabilityData as any;
@@ -154,6 +161,7 @@ export function CapabilityDetail({
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
           <TabsTrigger value="quickwins">Quick Wins</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="comments">Comments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="milestones" className="space-y-4">
@@ -173,7 +181,14 @@ export function CapabilityDetail({
           ) : (
             <div className="space-y-2">
               {milestones?.map((milestone) => (
-                <Card key={milestone.id} className="p-4">
+                <Card
+                  key={milestone.id}
+                  className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => {
+                    setSelectedMilestoneId(milestone.id);
+                    setIsMilestoneDetailOpen(true);
+                  }}
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
@@ -184,6 +199,7 @@ export function CapabilityDetail({
                         Level {milestone.from_level} → {milestone.to_level}
                       </p>
                     </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </Card>
               ))}
@@ -201,10 +217,20 @@ export function CapabilityDetail({
             ) : (
               <div className="space-y-2">
                 {capability.quick_wins?.map((qw: any) => (
-                  <Card key={qw.id} className="p-4">
+                  <Card
+                    key={qw.id}
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      setSelectedQuickWinId(qw.id);
+                      setIsQuickWinDetailOpen(true);
+                    }}
+                  >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{qw.name}</span>
-                      <StatusBadge status={qw.status} />
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={qw.status} />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -228,6 +254,17 @@ export function CapabilityDetail({
                   <p className="text-muted-foreground">{capability.qol_impact}</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="comments">
+          <Card>
+            <CardContent className="pt-6">
+              <CommentSection
+                entityType="capability"
+                entityId={capabilityId}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -257,6 +294,20 @@ export function CapabilityDetail({
         variant="destructive"
         onConfirm={handleDelete}
         isLoading={deleteCapability.isPending}
+      />
+
+      {/* Milestone Detail Modal */}
+      <MilestoneDetailModal
+        milestoneId={selectedMilestoneId}
+        open={isMilestoneDetailOpen}
+        onOpenChange={setIsMilestoneDetailOpen}
+      />
+
+      {/* Quick Win Detail Modal */}
+      <QuickWinDetailModal
+        quickWinId={selectedQuickWinId}
+        open={isQuickWinDetailOpen}
+        onOpenChange={setIsQuickWinDetailOpen}
       />
     </div>
   );

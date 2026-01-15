@@ -457,6 +457,116 @@ export interface Database {
           }
         ];
       };
+      comments: {
+        Row: {
+          id: string;
+          user_id: string;
+          entity_type: 'capability' | 'milestone' | 'quick_win';
+          entity_id: string;
+          parent_id: string | null;
+          content: string;
+          mentions: string[];
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          entity_type: 'capability' | 'milestone' | 'quick_win';
+          entity_id: string;
+          parent_id?: string | null;
+          content: string;
+          mentions?: string[];
+          is_deleted?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          entity_type?: 'capability' | 'milestone' | 'quick_win';
+          entity_id?: string;
+          parent_id?: string | null;
+          content?: string;
+          mentions?: string[];
+          is_deleted?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'comments_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_parent_id_fkey';
+            columns: ['parent_id'];
+            referencedRelation: 'comments';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
+          title: string;
+          message: string;
+          entity_type: 'capability' | 'milestone' | 'quick_win' | 'comment' | null;
+          entity_id: string | null;
+          actor_id: string | null;
+          is_read: boolean;
+          read_at: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
+          title: string;
+          message: string;
+          entity_type?: 'capability' | 'milestone' | 'quick_win' | 'comment' | null;
+          entity_id?: string | null;
+          actor_id?: string | null;
+          is_read?: boolean;
+          read_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
+          title?: string;
+          message?: string;
+          entity_type?: 'capability' | 'milestone' | 'quick_win' | 'comment' | null;
+          entity_id?: string | null;
+          actor_id?: string | null;
+          is_read?: boolean;
+          read_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_actor_id_fkey';
+            columns: ['actor_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

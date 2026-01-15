@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTimelineData, useUpdateMilestone } from '@/hooks';
-import { TimelineHeader, TimelineChart, type TimelineViewMode, type TimelinePath } from '@/components/timeline';
+import { TimelineHeader, TimelineChart, MilestoneDetailModal, type TimelineViewMode, type TimelinePath } from '@/components/timeline';
 import type { TimelineItem } from '@/components/timeline/TimelineChart';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +18,8 @@ export default function Timeline() {
   const [viewMode, setViewMode] = useState<TimelineViewMode>('months');
   const [selectedPath, setSelectedPath] = useState<TimelinePath>('B');
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Data fetching
   const { data: timelineData, isLoading } = useTimelineData(selectedPath);
@@ -82,14 +84,9 @@ export default function Timeline() {
 
   // Handlers
   const handleMilestoneClick = useCallback((id: string) => {
-    // Could open a detail modal or navigate
-    console.log('Milestone clicked:', id);
-    // For now, find the capability and navigate there
-    const item = chartItems.find(i => i.id === id);
-    if (item) {
-      navigate(`/capabilities/${item.capabilityId}`);
-    }
-  }, [chartItems, navigate]);
+    setSelectedMilestoneId(id);
+    setIsDetailModalOpen(true);
+  }, []);
 
   const handleMilestoneDrop = useCallback(async (id: string, newStartMonth: number) => {
     // In a real app, this would update the milestone's start date
@@ -267,6 +264,13 @@ export default function Timeline() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Milestone Detail Modal */}
+      <MilestoneDetailModal
+        milestoneId={selectedMilestoneId}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // src/pages/QuickWins.tsx
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { KanbanBoard, QuickWinForm } from '@/components/quickwins';
+import { KanbanBoard, QuickWinForm, QuickWinDetailModal } from '@/components/quickwins';
 import { useQuickWinStats, usePermissions } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,12 +10,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function QuickWins() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedQuickWinId, setSelectedQuickWinId] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [editingQuickWinId, setEditingQuickWinId] = useState<string | null>(null);
   const { data: stats, isLoading } = useQuickWinStats();
   const { canEdit } = usePermissions();
 
   const handleQuickWinClick = (id: string) => {
-    // Open quick win detail modal
-    console.log('Quick win clicked:', id);
+    setSelectedQuickWinId(id);
+    setIsDetailOpen(true);
+  };
+
+  const handleEditQuickWin = (id: string) => {
+    setIsDetailOpen(false);
+    setEditingQuickWinId(id);
+    setIsFormOpen(true);
   };
 
   return (
@@ -80,18 +89,38 @@ export default function QuickWins() {
       {/* Kanban board */}
       <KanbanBoard onQuickWinClick={handleQuickWinClick} readOnly={!canEdit} />
 
-      {/* Add form dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      {/* Add/Edit form dialog */}
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        setIsFormOpen(open);
+        if (!open) setEditingQuickWinId(null);
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add New Quick Win</DialogTitle>
+            <DialogTitle>
+              {editingQuickWinId ? 'Edit Quick Win' : 'Add New Quick Win'}
+            </DialogTitle>
           </DialogHeader>
           <QuickWinForm
-            onSuccess={() => setIsFormOpen(false)}
-            onCancel={() => setIsFormOpen(false)}
+            quickWinId={editingQuickWinId}
+            onSuccess={() => {
+              setIsFormOpen(false);
+              setEditingQuickWinId(null);
+            }}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingQuickWinId(null);
+            }}
           />
         </DialogContent>
       </Dialog>
+
+      {/* Quick Win Detail Modal */}
+      <QuickWinDetailModal
+        quickWinId={selectedQuickWinId}
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+        onEdit={handleEditQuickWin}
+      />
     </div>
   );
 }

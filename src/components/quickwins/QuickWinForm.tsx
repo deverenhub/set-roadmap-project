@@ -1,10 +1,12 @@
 // src/components/quickwins/QuickWinForm.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCreateQuickWin, useUpdateQuickWin, useCapabilities } from '@/hooks';
+import { useQuickWin } from '@/hooks/useQuickWins';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -16,6 +18,7 @@ import type { QuickWin } from '@/types';
 
 interface QuickWinFormProps {
   quickWin?: QuickWin;
+  quickWinId?: string | null;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -24,19 +27,36 @@ const CATEGORIES = ['Operations', 'Safety', 'HR', 'Technology', 'Process', 'Trai
 const INVESTMENT_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 const ROI_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 
-export function QuickWinForm({ quickWin, onSuccess, onCancel }: QuickWinFormProps) {
-  const isEditing = !!quickWin;
+export function QuickWinForm({ quickWin: initialQuickWin, quickWinId, onSuccess, onCancel }: QuickWinFormProps) {
+  const { data: fetchedQuickWin, isLoading: isLoadingQuickWin } = useQuickWin(quickWinId || '');
+  const quickWin = initialQuickWin || fetchedQuickWin;
+  const isEditing = !!quickWin || !!quickWinId;
   const { data: capabilities } = useCapabilities();
 
   const [formData, setFormData] = useState({
-    name: quickWin?.name || '',
-    description: quickWin?.description || '',
-    capability_id: quickWin?.capability_id || '',
-    timeline_months: quickWin?.timeline_months || 1,
-    investment: quickWin?.investment || 'MEDIUM',
-    roi: quickWin?.roi || 'MEDIUM',
-    category: quickWin?.category || '',
+    name: '',
+    description: '',
+    capability_id: '',
+    timeline_months: 1,
+    investment: 'MEDIUM',
+    roi: 'MEDIUM',
+    category: '',
   });
+
+  // Update form data when quickWin is loaded
+  useEffect(() => {
+    if (quickWin) {
+      setFormData({
+        name: quickWin.name || '',
+        description: quickWin.description || '',
+        capability_id: quickWin.capability_id || '',
+        timeline_months: quickWin.timeline_months || 1,
+        investment: quickWin.investment || 'MEDIUM',
+        roi: quickWin.roi || 'MEDIUM',
+        category: quickWin.category || '',
+      });
+    }
+  }, [quickWin]);
 
   const createQuickWin = useCreateQuickWin();
   const updateQuickWin = useUpdateQuickWin();
@@ -66,6 +86,32 @@ export function QuickWinForm({ quickWin, onSuccess, onCancel }: QuickWinFormProp
   const handleChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Show loading skeleton while fetching quick win data
+  if (quickWinId && isLoadingQuickWin) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

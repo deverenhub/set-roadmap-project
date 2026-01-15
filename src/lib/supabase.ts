@@ -28,4 +28,6 @@ export const db = {
   technologyOptions: () => supabase.from('technology_options'),
   qolImpacts: () => supabase.from('qol_impacts'),
   roadmapPaths: () => supabase.from('roadmap_paths'),
+  comments: () => supabase.from('comments'),
+  notifications: () => supabase.from('notifications'),
 };

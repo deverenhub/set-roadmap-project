@@ -1,0 +1,3 @@
+// src/components/notifications/index.ts
+export { NotificationBell } from './NotificationBell';
+export { NotificationList } from './NotificationList';

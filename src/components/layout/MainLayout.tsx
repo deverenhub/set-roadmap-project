@@ -27,6 +27,7 @@ import { SETLogoIcon } from '@/components/ui/SETLogo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ChatPanel } from '@/components/chat/ChatPanel';
+import { NotificationBell } from '@/components/notifications';
 import { useChatStore } from '@/stores/chatStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSignOut, useCurrentUser } from '@/hooks';
@@ -98,7 +99,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             <SETLogoIcon size={24} className="text-[#EB0A1E]" />
             <span className="font-semibold text-white">SET VPC Roadmap</span>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationBell className="text-gray-400 hover:text-white hover:bg-set-teal-900" />
             <Button
               variant="ghost"
               size="icon"
@@ -446,6 +448,22 @@ export function MainLayout({ children }: MainLayoutProps) {
             sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
           )}
         >
+          {/* Desktop top header */}
+          <header className="hidden lg:flex sticky top-0 z-20 h-14 items-center justify-end gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+            <NotificationBell />
+            <Button
+              variant={isChatOpen ? 'default' : 'ghost'}
+              size="icon"
+              className={cn(
+                isChatOpen
+                  ? 'bg-set-teal-500 text-white hover:bg-set-teal-600'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              onClick={toggleChat}
+            >
+              <Sparkles className="h-5 w-5" />
+            </Button>
+          </header>
           <div className="p-4 lg:p-8">{children}</div>
         </main>
 

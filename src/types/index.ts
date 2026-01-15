@@ -35,6 +35,16 @@ export type RoadmapPathInsert = Database['public']['Tables']['roadmap_paths']['I
 export type RoadmapPathUpdate = Database['public']['Tables']['roadmap_paths']['Update'];
 export type RoadmapType = 'inventory' | 'production' | 'planning';
 
+export type Comment = Database['public']['Tables']['comments']['Row'];
+export type CommentInsert = Database['public']['Tables']['comments']['Insert'];
+export type CommentUpdate = Database['public']['Tables']['comments']['Update'];
+export type CommentEntityType = 'capability' | 'milestone' | 'quick_win';
+
+export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
+export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
+export type NotificationType = 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
+
 // Enum types
 export type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type Status = 'not_started' | 'in_progress' | 'completed' | 'blocked';
@@ -59,6 +69,15 @@ export interface QuickWinWithCapability extends QuickWin {
 
 export interface ActivityLogWithUser extends ActivityLog {
   user?: Pick<User, 'id' | 'full_name' | 'email'> | null;
+}
+
+export interface CommentWithUser extends Comment {
+  user: Pick<User, 'id' | 'full_name' | 'email'>;
+  replies?: CommentWithUser[];
+}
+
+export interface NotificationWithActor extends Notification {
+  actor?: Pick<User, 'id' | 'full_name' | 'email'> | null;
 }
 
 // Dashboard types

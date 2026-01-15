@@ -39,9 +39,9 @@ import {
   PieChart as PieChartIcon,
   Layers,
   FileText,
-  Download,
   Info,
 } from 'lucide-react';
+import { PDFExportButton } from '@/components/reports';
 import { format, startOfQuarter, getQuarter, getYear, addQuarters, isAfter, isBefore } from 'date-fns';
 
 // Health Status Types
@@ -449,10 +449,7 @@ CAPABILITIES
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportReport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
-          </Button>
+          <PDFExportButton />
           <Button variant="outline" size="sm" onClick={handleGenerateSummary}>
             <FileText className="mr-2 h-4 w-4" />
             Copy Summary
