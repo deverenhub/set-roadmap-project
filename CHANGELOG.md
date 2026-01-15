@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Comments System** - Threaded comments on capabilities, milestones, and quick wins with @mentions support
+- **Notifications System** - Real-time in-app notifications with bell icon in header
+- **Milestone Detail Modal** - Full milestone view with status change buttons and comments
+- **Quick Win Detail Modal** - Full quick win view with comments integration
+- **Real-time Updates** - Supabase subscriptions for live comment and notification updates
+- **Blocked Milestone Alerts** - Automatic notifications to admins/editors when milestones are blocked
 - **Timeline Page** - New interactive Gantt chart with drag-and-drop milestone scheduling
 - **Timeline Components** - TimelineHeader and TimelineChart with dnd-kit integration
 - Export Report button downloads text file with executive summary
@@ -116,6 +122,8 @@ The application requires the following Supabase tables:
 - `milestones` - Project milestones with path estimates
 - `quick_wins` - Quick win initiatives
 - `dependencies` - Capability relationships
+- `comments` - Threaded comments with @mentions (added in 1.1.0)
+- `notifications` - In-app notifications with real-time support (added in 1.1.0)
 
 ### Environment Variables
 Required environment variables:

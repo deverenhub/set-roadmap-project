@@ -115,28 +115,30 @@ export function MilestoneDetailModal({
             </DialogHeader>
 
             {/* Status Change Buttons */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-muted-foreground mr-2 self-center">Change status:</span>
-              {['not_started', 'in_progress', 'completed', 'blocked'].map((status) => {
-                const Icon = statusIcons[status];
-                const isCurrentStatus = milestone.status === status;
-                return (
-                  <Button
-                    key={status}
-                    variant={isCurrentStatus ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusChange(status)}
-                    disabled={isCurrentStatus || updateMilestone.isPending}
-                    className={cn(
-                      isCurrentStatus && statusColors[status]
-                    )}
-                  >
-                    <Icon className="h-3 w-3 mr-1" />
-                    {statusLabels[status]}
-                  </Button>
-                );
-              })}
-            </div>
+            {canEdit && (
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm text-muted-foreground mr-2 self-center">Change status:</span>
+                {['not_started', 'in_progress', 'completed', 'blocked'].map((status) => {
+                  const Icon = statusIcons[status];
+                  const isCurrentStatus = milestone.status === status;
+                  return (
+                    <Button
+                      key={status}
+                      variant={isCurrentStatus ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleStatusChange(status)}
+                      disabled={isCurrentStatus || updateMilestone.isPending}
+                      className={cn(
+                        isCurrentStatus && statusColors[status]
+                      )}
+                    >
+                      <Icon className="h-3 w-3 mr-1" />
+                      {statusLabels[status]}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Description */}
             {milestone.description && (
