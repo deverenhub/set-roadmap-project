@@ -1,7 +1,7 @@
 // src/components/capabilities/CapabilityDetail.tsx
 import { useState } from 'react';
-import { ArrowLeft, Edit, Trash2, Plus, ChevronRight } from 'lucide-react';
-import { useCapability, useDeleteCapability, useMilestonesByCapability, usePermissions } from '@/hooks';
+import { ArrowLeft, Edit, Trash2, Plus, ChevronRight, Paperclip } from 'lucide-react';
+import { useCapability, useDeleteCapability, useMilestonesByCapability, usePermissions, useAttachmentCount } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge, PriorityBadge, StatusBadge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { CommentSection } from '@/components/comments';
 import { MilestoneDetailModal } from '@/components/timeline';
 import { QuickWinDetailModal } from '@/components/quickwins';
+import { FileUpload, AttachmentsList } from '@/components/attachments';
 
 interface CapabilityDetailProps {
   capabilityId: string;
@@ -38,6 +39,7 @@ export function CapabilityDetail({
   const capability = capabilityData as any;
   const { data: milestonesData } = useMilestonesByCapability(capabilityId);
   const milestones = milestonesData as any[];
+  const { data: attachmentCount } = useAttachmentCount('capability', capabilityId);
   const deleteCapability = useDeleteCapability();
   const { canEdit, canDelete } = usePermissions();
 
@@ -161,6 +163,15 @@ export function CapabilityDetail({
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
           <TabsTrigger value="quickwins">Quick Wins</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="attachments" className="flex items-center gap-1">
+            <Paperclip className="h-3.5 w-3.5" />
+            Attachments
+            {attachmentCount ? (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                {attachmentCount}
+              </Badge>
+            ) : null}
+          </TabsTrigger>
           <TabsTrigger value="comments">Comments</TabsTrigger>
         </TabsList>
 
@@ -254,6 +265,23 @@ export function CapabilityDetail({
                   <p className="text-muted-foreground">{capability.qol_impact}</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="attachments">
+          <Card>
+            <CardContent className="pt-6 space-y-6">
+              {canEdit && (
+                <FileUpload
+                  entityType="capability"
+                  entityId={capabilityId}
+                />
+              )}
+              <AttachmentsList
+                entityType="capability"
+                entityId={capabilityId}
+              />
             </CardContent>
           </Card>
         </TabsContent>

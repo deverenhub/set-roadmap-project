@@ -11,6 +11,7 @@ import {
   Trash2,
   Link as LinkIcon,
   AlertTriangle,
+  Paperclip,
 } from 'lucide-react';
 import {
   Dialog,
@@ -22,9 +23,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CommentSection } from '@/components/comments';
+import { FileUpload, AttachmentsList } from '@/components/attachments';
 import { useMilestone, useDeleteMilestone, useUpdateMilestone } from '@/hooks/useMilestones';
-import { usePermissions } from '@/hooks';
+import { usePermissions, useAttachmentCount } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -63,6 +66,7 @@ export function MilestoneDetailModal({
   onEdit,
 }: MilestoneDetailModalProps) {
   const { data: milestone, isLoading } = useMilestone(milestoneId || '');
+  const { data: attachmentCount } = useAttachmentCount('milestone', milestoneId || '');
   const deleteMilestone = useDeleteMilestone();
   const updateMilestone = useUpdateMilestone();
   const { canEdit } = usePermissions();
@@ -261,9 +265,37 @@ export function MilestoneDetailModal({
               </>
             )}
 
-            {/* Comments Section */}
+            {/* Comments & Attachments Section */}
             <Separator />
-            <CommentSection entityType="milestone" entityId={milestone.id} />
+            <Tabs defaultValue="comments" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="comments" className="flex-1">Comments</TabsTrigger>
+                <TabsTrigger value="attachments" className="flex-1 flex items-center justify-center gap-1">
+                  <Paperclip className="h-3.5 w-3.5" />
+                  Attachments
+                  {attachmentCount ? (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                      {attachmentCount}
+                    </Badge>
+                  ) : null}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="comments" className="mt-4">
+                <CommentSection entityType="milestone" entityId={milestone.id} />
+              </TabsContent>
+              <TabsContent value="attachments" className="mt-4 space-y-4">
+                {canEdit && (
+                  <FileUpload
+                    entityType="milestone"
+                    entityId={milestone.id}
+                  />
+                )}
+                <AttachmentsList
+                  entityType="milestone"
+                  entityId={milestone.id}
+                />
+              </TabsContent>
+            </Tabs>
           </>
         ) : (
           <div className="py-8 text-center text-muted-foreground">
