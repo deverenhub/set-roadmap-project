@@ -159,7 +159,7 @@ export function ExecutiveSummaryPDF({
       {/* Overview Page */}
       <PDFContentPage title="Executive Overview">
         {/* Health Banner */}
-        <View style={[styles.card, { backgroundColor: healthColor + '15', borderColor: healthColor }]}>
+        <View style={[styles.card, { backgroundColor: healthColor + '15', borderColor: healthColor }]} wrap={false}>
           <View style={styles.rowBetween}>
             <View>
               <Text style={[styles.textBold, { fontSize: 16, color: healthColor }]}>
@@ -200,7 +200,7 @@ export function ExecutiveSummaryPDF({
 
         {/* Progress Summary */}
         <PDFSectionTitle>Progress Summary</PDFSectionTitle>
-        <View style={styles.card}>
+        <View style={styles.card} wrap={false}>
           <View style={[styles.rowBetween, { marginBottom: 15 }]}>
             <Text style={styles.cardTitle}>Milestone Completion</Text>
             <Text style={styles.textBold}>{metrics.overallProgress}%</Text>
@@ -220,35 +220,37 @@ export function ExecutiveSummaryPDF({
           <PDFProgressBar value={metrics.quickWinProgress} color={colors.primaryDark} />
         </View>
 
-        {/* Strategic Narrative */}
-        <PDFSectionTitle>Strategic Narrative</PDFSectionTitle>
-        <View style={[styles.card, { backgroundColor: colors.gray[50] }]}>
-          <Text style={styles.text}>
-            The SET Roadmap initiative is currently{' '}
-            <Text style={{ fontWeight: 'bold' }}>
-              {metrics.healthStatus === 'healthy' ? 'on track' :
-               metrics.healthStatus === 'at-risk' ? 'at moderate risk' : 'requiring immediate attention'}
-            </Text>{' '}
-            with an overall completion rate of{' '}
-            <Text style={{ fontWeight: 'bold' }}>{metrics.overallProgress}%</Text>.
-            We have successfully completed{' '}
-            <Text style={{ fontWeight: 'bold' }}>{metrics.completedMilestones}</Text> of{' '}
-            <Text style={{ fontWeight: 'bold' }}>{metrics.totalMilestones}</Text> planned milestones
-            across{' '}
-            <Text style={{ fontWeight: 'bold' }}>{metrics.totalCapabilities}</Text> operational capabilities.
-          </Text>
-          <Text style={[styles.text, { marginTop: 10 }]}>
-            {metrics.blockedMilestones > 0
-              ? `${metrics.blockedMilestones} milestone(s) are currently blocked and require leadership attention. These blockers may impact our projected timeline if not resolved within the next sprint cycle.`
-              : 'No milestones are currently blocked, allowing the team to maintain momentum on the planned timeline.'
-            }
-          </Text>
-          <Text style={[styles.text, { marginTop: 10 }]}>
-            Current maturity has progressed to Level {metrics.avgCurrentLevel} on average,
-            with a target of Level {metrics.avgTargetLevel}.
-            Quick wins are tracking at {metrics.quickWinProgress}% completion,
-            providing early value while larger initiatives are in development.
-          </Text>
+        {/* Strategic Narrative - wrapped together with title to prevent page split */}
+        <View wrap={false}>
+          <PDFSectionTitle>Strategic Narrative</PDFSectionTitle>
+          <View style={[styles.card, { backgroundColor: colors.gray[50] }]}>
+            <Text style={styles.text}>
+              The SET Roadmap initiative is currently{' '}
+              <Text style={{ fontWeight: 'bold' }}>
+                {metrics.healthStatus === 'healthy' ? 'on track' :
+                 metrics.healthStatus === 'at-risk' ? 'at moderate risk' : 'requiring immediate attention'}
+              </Text>{' '}
+              with an overall completion rate of{' '}
+              <Text style={{ fontWeight: 'bold' }}>{metrics.overallProgress}%</Text>.
+              We have successfully completed{' '}
+              <Text style={{ fontWeight: 'bold' }}>{metrics.completedMilestones}</Text> of{' '}
+              <Text style={{ fontWeight: 'bold' }}>{metrics.totalMilestones}</Text> planned milestones
+              across{' '}
+              <Text style={{ fontWeight: 'bold' }}>{metrics.totalCapabilities}</Text> operational capabilities.
+            </Text>
+            <Text style={[styles.text, { marginTop: 10 }]}>
+              {metrics.blockedMilestones > 0
+                ? `${metrics.blockedMilestones} milestone(s) are currently blocked and require leadership attention. These blockers may impact our projected timeline if not resolved within the next sprint cycle.`
+                : 'No milestones are currently blocked, allowing the team to maintain momentum on the planned timeline.'
+              }
+            </Text>
+            <Text style={[styles.text, { marginTop: 10 }]}>
+              Current maturity has progressed to Level {metrics.avgCurrentLevel} on average,
+              with a target of Level {metrics.avgTargetLevel}.
+              Quick wins are tracking at {metrics.quickWinProgress}% completion,
+              providing early value while larger initiatives are in development.
+            </Text>
+          </View>
         </View>
       </PDFContentPage>
 
@@ -337,7 +339,7 @@ export function ExecutiveSummaryPDF({
       <PDFContentPage title="Recommendations">
         <PDFSectionTitle>Strategic Recommendations</PDFSectionTitle>
 
-        <View style={[styles.card, { backgroundColor: colors.status.success + '10', borderColor: colors.status.success }]}>
+        <View style={[styles.card, { backgroundColor: colors.status.success + '10', borderColor: colors.status.success }]} wrap={false}>
           <Text style={[styles.cardTitle, { color: colors.status.success, marginBottom: 10 }]}>
             Recommended Actions
           </Text>
@@ -372,7 +374,7 @@ export function ExecutiveSummaryPDF({
         </View>
 
         <PDFSectionTitle>Report Information</PDFSectionTitle>
-        <View style={styles.card}>
+        <View style={styles.card} wrap={false}>
           <View style={[styles.row, { marginBottom: 8 }]}>
             <Text style={styles.textBold}>Generated: </Text>
             <Text style={styles.text}>

@@ -84,7 +84,7 @@ interface TitlePageProps {
 
 export function PDFTitlePage({ title, subtitle, date }: TitlePageProps) {
   return (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" style={styles.pageTitlePage}>
       <View style={styles.titlePage}>
         <View style={styles.titleLogo}>
           <PDFLogo size={80} />
@@ -111,9 +111,11 @@ interface ContentPageProps {
 
 export function PDFContentPage({ children, title }: ContentPageProps) {
   return (
-    <Page size="A4" style={styles.pageWithHeader}>
+    <Page size="A4" style={styles.pageWithHeader} wrap>
       <PDFHeader title={title || ''} />
-      {children}
+      <View style={{ flex: 1 }} wrap>
+        {children}
+      </View>
       <PDFFooter />
     </Page>
   );
@@ -135,9 +137,9 @@ export function PDFStatBox({ value, label, color }: StatBoxProps) {
   );
 }
 
-// Stats row component
+// Stats row component - wrap={false} keeps all stats on same page
 export function PDFStatsRow({ children }: { children: React.ReactNode }) {
-  return <View style={styles.statsRow}>{children}</View>;
+  return <View style={styles.statsRow} wrap={false}>{children}</View>;
 }
 
 // Progress bar component
@@ -210,9 +212,9 @@ export function PDFPriorityBadge({ priority }: { priority: string }) {
   return <PDFBadge text={priority} variant={variantMap[priority] || 'default'} />;
 }
 
-// Section title
+// Section title - minPresenceAhead keeps title with following content
 export function PDFSectionTitle({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.sectionTitle}>{children}</Text>;
+  return <Text style={styles.sectionTitle} minPresenceAhead={100}>{children}</Text>;
 }
 
 // Subsection title
@@ -220,9 +222,9 @@ export function PDFSubsectionTitle({ children }: { children: React.ReactNode }) 
   return <Text style={styles.subsectionTitle}>{children}</Text>;
 }
 
-// Card component
+// Card component - wrap={false} prevents page breaks within cards
 export function PDFCard({ children }: { children: React.ReactNode }) {
-  return <View style={styles.card}>{children}</View>;
+  return <View style={styles.card} wrap={false}>{children}</View>;
 }
 
 // Table components
@@ -240,7 +242,7 @@ interface TableProps {
 
 export function PDFTable({ columns, data, renderCell }: TableProps) {
   return (
-    <View style={styles.table}>
+    <View style={styles.table} wrap={false}>
       {/* Header */}
       <View style={styles.tableHeader}>
         {columns.map((col) => (
@@ -261,6 +263,7 @@ export function PDFTable({ columns, data, renderCell }: TableProps) {
         <View
           key={index}
           style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
+          wrap={false}
         >
           {columns.map((col) => (
             <View

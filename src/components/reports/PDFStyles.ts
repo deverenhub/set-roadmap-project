@@ -43,6 +43,12 @@ export const styles = StyleSheet.create({
     padding: 40,
     fontFamily: 'Helvetica',
   },
+  pageTitlePage: {
+    flexDirection: 'column',
+    backgroundColor: colors.dark,
+    padding: 0,
+    fontFamily: 'Helvetica',
+  },
   pageWithHeader: {
     flexDirection: 'column',
     backgroundColor: colors.white,
@@ -109,7 +115,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.dark,
     padding: 40,
   },
   titleLogo: {
