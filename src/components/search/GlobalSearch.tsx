@@ -104,8 +104,8 @@ export function GlobalSearch({ className }: GlobalSearchProps) {
         </kbd>
       </Button>
 
-      {/* Command Dialog */}
-      <CommandDialog open={open} onOpenChange={handleOpenChange}>
+      {/* Command Dialog - shouldFilter=false because we use custom filtering via useGlobalSearch */}
+      <CommandDialog open={open} onOpenChange={handleOpenChange} shouldFilter={false}>
         <CommandInput
           placeholder="Search capabilities, milestones, quick wins..."
           value={query}
