@@ -22,12 +22,14 @@ import {
   Map,
   ChevronDown,
   Presentation,
+  History,
 } from 'lucide-react';
 import { SETLogoIcon } from '@/components/ui/SETLogo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { NotificationBell } from '@/components/notifications';
+import { GlobalSearch } from '@/components/search';
 import { useChatStore } from '@/stores/chatStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSignOut, useCurrentUser } from '@/hooks';
@@ -69,6 +71,7 @@ const navigation: NavItem[] = [
   { name: 'Timeline', href: '/timeline', icon: Calendar },
   { name: 'Dependencies', href: '/dependencies', icon: GitBranch },
   { name: 'Quick Wins', href: '/quick-wins', icon: Zap },
+  { name: 'Activity Log', href: '/activity-log', icon: History },
 ];
 
 export function MainLayout({ children }: MainLayoutProps) {
@@ -100,6 +103,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             <span className="font-semibold text-white">SET VPC Roadmap</span>
           </div>
           <div className="ml-auto flex items-center gap-1">
+            <GlobalSearch className="text-gray-400 hover:text-white hover:bg-set-teal-900 border-set-teal-800" />
             <NotificationBell className="text-gray-400 hover:text-white hover:bg-set-teal-900" />
             <Button
               variant="ghost"
@@ -450,6 +454,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         >
           {/* Desktop top header */}
           <header className="hidden lg:flex sticky top-0 z-20 h-14 items-center justify-end gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+            <GlobalSearch />
             <NotificationBell />
             <Button
               variant={isChatOpen ? 'default' : 'ghost'}
