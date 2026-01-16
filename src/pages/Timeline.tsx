@@ -1,14 +1,19 @@
 // src/pages/Timeline.tsx
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTimelineData, useUpdateMilestone } from '@/hooks';
+import {
+  useTimelineData,
+  useUpdateMilestonePosition,
+  useUpdateMilestoneDuration,
+  usePermissions
+} from '@/hooks';
 import { TimelineHeader, TimelineChart, MilestoneDetailModal, type TimelineViewMode, type TimelinePath } from '@/components/timeline';
 import type { TimelineItem } from '@/components/timeline/TimelineChart';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Info, Calendar, Target, TrendingUp, AlertCircle } from 'lucide-react';
+import { Info, Calendar, Target, TrendingUp, AlertCircle, Lock } from 'lucide-react';
 
 export default function Timeline() {
   const navigate = useNavigate();
@@ -21,9 +26,11 @@ export default function Timeline() {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Data fetching
+  // Data fetching and mutations
   const { data: timelineData, isLoading } = useTimelineData(selectedPath);
-  const updateMilestone = useUpdateMilestone();
+  const updatePosition = useUpdateMilestonePosition();
+  const updateDuration = useUpdateMilestoneDuration();
+  const { canEdit } = usePermissions();
 
   // Project start date (could come from settings)
   const projectStartDate = useMemo(() => {
@@ -45,8 +52,12 @@ export default function Timeline() {
         capabilityOffsets[capKey] = 0;
       }
 
-      const startMonth = capabilityOffsets[capKey];
+      // Base start month (sequential within capability)
+      const baseStartMonth = capabilityOffsets[capKey];
       capabilityOffsets[capKey] += item.duration;
+
+      // Apply custom offset if set
+      const startMonth = Math.max(0, baseStartMonth + (item.timelineOffset || 0));
 
       return {
         id: item.id,
@@ -58,6 +69,7 @@ export default function Timeline() {
         duration: item.duration,
         status: item.status,
         startMonth,
+        timelineOffset: item.timelineOffset || 0,
       };
     });
   }, [timelineData]);
@@ -89,11 +101,45 @@ export default function Timeline() {
   }, []);
 
   const handleMilestoneDrop = useCallback(async (id: string, newStartMonth: number) => {
-    // In a real app, this would update the milestone's start date
-    toast.info(`Milestone scheduling updated - Start month: ${newStartMonth}`);
-    // Note: The current data model uses duration-based sequencing, not absolute dates
-    // A full implementation would need to update the database schema
-  }, []);
+    if (!canEdit) {
+      toast.error('You do not have permission to edit milestones');
+      return;
+    }
+
+    // Find the item to get its current offset
+    const item = chartItems.find(i => i.id === id);
+    if (!item) return;
+
+    // Calculate the offset change based on the new position
+    // The startMonth shown is baseStartMonth + offset, so newOffset = newStartMonth - baseStartMonth
+    const baseStartMonth = item.startMonth - (item.timelineOffset || 0);
+    const newOffset = newStartMonth - baseStartMonth;
+
+    updatePosition.mutate(
+      { id, timelineOffset: newOffset },
+      {
+        onSuccess: () => {
+          toast.success('Milestone position updated');
+        },
+      }
+    );
+  }, [canEdit, chartItems, updatePosition]);
+
+  const handleMilestoneResize = useCallback(async (id: string, newDuration: number) => {
+    if (!canEdit) {
+      toast.error('You do not have permission to edit milestones');
+      return;
+    }
+
+    updateDuration.mutate(
+      { id, path: selectedPath, duration: newDuration },
+      {
+        onSuccess: () => {
+          toast.success(`Duration updated to ${newDuration} months`);
+        },
+      }
+    );
+  }, [canEdit, selectedPath, updateDuration]);
 
   const handleZoomIn = useCallback(() => {
     setZoomLevel(prev => Math.min(prev + 25, 200));
@@ -198,15 +244,41 @@ export default function Timeline() {
 
       {/* Timeline Chart */}
       {chartItems.length > 0 ? (
-        <TimelineChart
-          items={chartItems}
-          viewMode={viewMode}
-          zoomLevel={zoomLevel}
-          projectStartDate={projectStartDate}
-          onItemClick={handleMilestoneClick}
-          onItemDrop={handleMilestoneDrop}
-          scrollContainerRef={scrollContainerRef}
-        />
+        <>
+          {canEdit && (
+            <Card className="bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <CardContent className="py-3 flex items-center gap-3">
+                <Info className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <span className="font-medium">Edit Mode:</span>{' '}
+                  Drag milestones to change start position • Drag right edge to resize duration
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {!canEdit && (
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="py-3 flex items-center gap-3">
+                <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium">View Only:</span>{' '}
+                  Admins and editors can drag milestones to adjust timing
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          <TimelineChart
+            items={chartItems}
+            viewMode={viewMode}
+            zoomLevel={zoomLevel}
+            projectStartDate={projectStartDate}
+            onItemClick={handleMilestoneClick}
+            onItemDrop={handleMilestoneDrop}
+            onItemResize={handleMilestoneResize}
+            scrollContainerRef={scrollContainerRef}
+            canEdit={canEdit}
+          />
+        </>
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center h-[400px] text-center">

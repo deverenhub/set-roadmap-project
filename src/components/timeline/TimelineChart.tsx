@@ -14,7 +14,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { format, addMonths, startOfMonth, differenceInDays, differenceInMonths, isSameMonth } from 'date-fns';
+import { format, addMonths, differenceInMonths } from 'date-fns';
+import { GripVertical } from 'lucide-react';
 import type { TimelineViewMode } from './TimelineHeader';
 
 export interface TimelineItem {
@@ -27,6 +28,7 @@ export interface TimelineItem {
   duration: number;
   status: string;
   startMonth: number; // Relative month from project start
+  timelineOffset?: number; // Custom offset for positioning
 }
 
 interface TimelineChartProps {
@@ -36,7 +38,9 @@ interface TimelineChartProps {
   projectStartDate: Date;
   onItemClick?: (id: string) => void;
   onItemDrop?: (id: string, newStartMonth: number) => void;
+  onItemResize?: (id: string, newDuration: number) => void;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
+  canEdit?: boolean;
 }
 
 const statusColors: Record<string, { bg: string; border: string; text: string }> = {
@@ -58,12 +62,15 @@ interface DraggableMilestoneProps {
   left: number;
   width: number;
   onClick?: () => void;
+  onResizeStart?: (e: React.MouseEvent) => void;
+  canEdit?: boolean;
 }
 
-function DraggableMilestone({ item, left, width, onClick }: DraggableMilestoneProps) {
+function DraggableMilestone({ item, left, width, onClick, onResizeStart, canEdit = false }: DraggableMilestoneProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: item.id,
     data: item,
+    disabled: !canEdit,
   });
 
   const style = {
@@ -81,31 +88,54 @@ function DraggableMilestone({ item, left, width, onClick }: DraggableMilestonePr
           <div
             ref={setNodeRef}
             style={style}
-            {...listeners}
-            {...attributes}
             onClick={onClick}
             className={cn(
-              "absolute h-10 rounded-lg border-2 cursor-grab active:cursor-grabbing",
-              "flex items-center px-3 gap-2 transition-all duration-150",
-              "hover:shadow-lg hover:scale-[1.02] hover:z-20",
+              "absolute h-10 rounded-lg border-2 group",
+              "flex items-center gap-2 transition-all duration-150",
+              "hover:shadow-lg hover:z-20",
+              canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
               status.bg,
               status.border,
               isDragging && "opacity-50 z-50 shadow-xl scale-105"
             )}
           >
+            {/* Drag handle - only for editors */}
+            {canEdit && (
+              <div
+                {...listeners}
+                {...attributes}
+                className="flex items-center h-full px-1 cursor-grab hover:bg-black/5 rounded-l-lg"
+              >
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+
             {/* Priority indicator */}
-            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", priorityColors[item.priority] || priorityColors.MEDIUM)} />
+            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", !canEdit && "ml-3", priorityColors[item.priority] || priorityColors.MEDIUM)} />
 
             {/* Milestone name */}
-            <span className={cn("text-sm font-medium truncate", status.text)}>
-              {width > 100 ? item.name : item.name.slice(0, 10) + (item.name.length > 10 ? '...' : '')}
+            <span className={cn("text-sm font-medium truncate flex-1", status.text)}>
+              {width > 120 ? item.name : item.name.slice(0, 8) + (item.name.length > 8 ? '...' : '')}
             </span>
 
             {/* Duration badge */}
-            {width > 80 && (
-              <Badge variant="secondary" className="ml-auto text-xs flex-shrink-0">
+            {width > 100 && (
+              <Badge variant="secondary" className="text-xs flex-shrink-0 mr-1">
                 {item.duration}mo
               </Badge>
+            )}
+
+            {/* Resize handle - right edge */}
+            {canEdit && (
+              <div
+                className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-primary/20 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  onResizeStart?.(e);
+                }}
+              >
+                <div className="absolute right-0.5 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/40 rounded" />
+              </div>
             )}
           </div>
         </TooltipTrigger>
@@ -122,6 +152,7 @@ function DraggableMilestone({ item, left, width, onClick }: DraggableMilestonePr
               </Badge>
             </div>
             <p className="text-xs">Duration: {item.duration} months</p>
+            {canEdit && <p className="text-xs text-muted-foreground italic">Drag to move • Drag edge to resize</p>}
           </div>
         </TooltipContent>
       </Tooltip>
@@ -136,9 +167,12 @@ export function TimelineChart({
   projectStartDate,
   onItemClick,
   onItemDrop,
+  onItemResize,
   scrollContainerRef,
+  canEdit = false,
 }: TimelineChartProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [resizingItem, setResizingItem] = useState<{ id: string; startX: number; startDuration: number } | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -149,6 +183,62 @@ export function TimelineChart({
     }),
     useSensor(KeyboardSensor)
   );
+
+  // Handle resize start
+  const handleResizeStart = useCallback((item: TimelineItem, e: React.MouseEvent) => {
+    if (!canEdit) return;
+    setResizingItem({
+      id: item.id,
+      startX: e.clientX,
+      startDuration: item.duration,
+    });
+  }, [canEdit]);
+
+  // Handle resize move (via document mouse events)
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    if (!resizingItem || !chartRef.current) return;
+
+    const deltaX = e.clientX - resizingItem.startX;
+    const monthsPerPixel = viewMode === 'months'
+      ? 1 / (80 * (zoomLevel / 100))
+      : 3 / (240 * (zoomLevel / 100));
+
+    const monthDelta = Math.round(deltaX * monthsPerPixel);
+    const newDuration = Math.max(1, resizingItem.startDuration + monthDelta);
+
+    // Update visually during drag (optional - could show preview)
+  }, [resizingItem, viewMode, zoomLevel]);
+
+  // Handle resize end
+  const handleResizeEnd = useCallback((e: MouseEvent) => {
+    if (!resizingItem) return;
+
+    const deltaX = e.clientX - resizingItem.startX;
+    const monthsPerPixel = viewMode === 'months'
+      ? 1 / (80 * (zoomLevel / 100))
+      : 3 / (240 * (zoomLevel / 100));
+
+    const monthDelta = Math.round(deltaX * monthsPerPixel);
+    const newDuration = Math.max(1, resizingItem.startDuration + monthDelta);
+
+    if (newDuration !== resizingItem.startDuration && onItemResize) {
+      onItemResize(resizingItem.id, newDuration);
+    }
+
+    setResizingItem(null);
+  }, [resizingItem, viewMode, zoomLevel, onItemResize]);
+
+  // Add/remove document event listeners for resize
+  useEffect(() => {
+    if (resizingItem) {
+      document.addEventListener('mousemove', handleResizeMove);
+      document.addEventListener('mouseup', handleResizeEnd);
+      return () => {
+        document.removeEventListener('mousemove', handleResizeMove);
+        document.removeEventListener('mouseup', handleResizeEnd);
+      };
+    }
+  }, [resizingItem, handleResizeMove, handleResizeEnd]);
 
   // Calculate timeline dimensions
   const { totalMonths, columnWidth, timelineWidth, columns } = useMemo(() => {
@@ -401,6 +491,8 @@ export function TimelineChart({
                               left={left}
                               width={width}
                               onClick={() => onItemClick?.(ms.id)}
+                              onResizeStart={(e) => handleResizeStart(ms, e)}
+                              canEdit={canEdit}
                             />
                           </div>
                         </div>

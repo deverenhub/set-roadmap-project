@@ -2,6 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { sendBlockedMilestoneEmails } from '@/lib/email';
+import { notifyTeamsBlockedMilestone, notifyTeamsMilestoneCompleted } from './useTeamsNotifications';
+import { usePreferencesStore } from '@/stores/preferencesStore';
 import type { Milestone, MilestoneInsert, MilestoneUpdate, MilestoneWithCapability } from '@/types';
 import { capabilityKeys } from './useCapabilities';
 
@@ -94,7 +97,12 @@ export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
   return useQuery({
     queryKey: milestoneKeys.timeline(path),
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First try with timeline_offset, fallback to without if column doesn't exist
+      let data;
+      let error;
+
+      // Try fetching with timeline_offset column
+      const result = await supabase
         .from('milestones')
         .select(`
           id,
@@ -105,9 +113,34 @@ export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
           path_a_months,
           path_b_months,
           path_c_months,
+          timeline_offset,
           capability:capabilities(id, name, color, priority)
         `)
         .order('from_level', { ascending: true });
+
+      // If timeline_offset column doesn't exist, query without it
+      if (result.error && result.error.message.includes('timeline_offset')) {
+        const fallbackResult = await supabase
+          .from('milestones')
+          .select(`
+            id,
+            name,
+            status,
+            from_level,
+            to_level,
+            path_a_months,
+            path_b_months,
+            path_c_months,
+            capability:capabilities(id, name, color, priority)
+          `)
+          .order('from_level', { ascending: true });
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+      } else {
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
 
@@ -118,12 +151,81 @@ export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
           id: ms.id,
           name: ms.name,
           capability: ms.capability?.name || 'Unknown',
+          capabilityId: ms.capability?.id,
           capabilityColor: ms.capability?.color || '#3b82f6',
           priority: ms.capability?.priority || 'MEDIUM',
           duration: ms[durationKey] || 3,
           status: ms.status,
+          timelineOffset: ms.timeline_offset || 0,
         };
       });
+    },
+  });
+}
+
+// Update milestone timeline position (drag to move start)
+export function useUpdateMilestonePosition() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, timelineOffset }: { id: string; timelineOffset: number }) => {
+      const { data: result, error } = await supabase
+        .from('milestones')
+        .update({
+          timeline_offset: timelineOffset,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all });
+      toast.success('Milestone position updated');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update position: ${error.message}`);
+    },
+  });
+}
+
+// Update milestone duration (resize)
+export function useUpdateMilestoneDuration() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      path,
+      duration
+    }: {
+      id: string;
+      path: 'A' | 'B' | 'C';
+      duration: number;
+    }) => {
+      const pathColumn = `path_${path.toLowerCase()}_months` as const;
+      const { data: result, error } = await supabase
+        .from('milestones')
+        .update({
+          [pathColumn]: duration,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all });
+      toast.success('Milestone duration updated');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update duration: ${error.message}`);
     },
   });
 }
@@ -160,6 +262,16 @@ export function useUpdateMilestone() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: MilestoneUpdate & { id: string }) => {
+      // Get current milestone to check status change
+      const { data: currentMilestone } = await supabase
+        .from('milestones')
+        .select('name, status')
+        .eq('id', id)
+        .single();
+
+      const oldStatus = currentMilestone?.status;
+      const milestoneName = currentMilestone?.name || 'Milestone';
+
       // Auto-set dates based on status changes
       const updates: MilestoneUpdate = {
         ...data,
@@ -181,6 +293,38 @@ export function useUpdateMilestone() {
         .single();
 
       if (error) throw error;
+
+      // Get Teams notification preferences (use getState for non-component context)
+      const { preferences } = usePreferencesStore.getState();
+      const teamsEnabled = preferences.teamsNotifications && preferences.teamsWebhookUrl;
+
+      // Send email notifications if milestone was marked as blocked
+      if (data.status === 'blocked' && oldStatus !== 'blocked') {
+        sendBlockedMilestoneEmails(milestoneName, id, oldStatus || 'unknown');
+
+        // Send Teams notification for blocked milestone
+        if (teamsEnabled && preferences.teamsNotifyOnBlockedItems) {
+          notifyTeamsBlockedMilestone(
+            preferences.teamsWebhookUrl,
+            milestoneName,
+            id,
+            oldStatus || 'unknown'
+          ).catch(err => console.error('Teams notification error:', err));
+        }
+      }
+
+      // Send Teams notification for completed milestone
+      if (data.status === 'completed' && oldStatus !== 'completed') {
+        if (teamsEnabled && preferences.teamsNotifyOnMilestoneComplete) {
+          notifyTeamsMilestoneCompleted(
+            preferences.teamsWebhookUrl,
+            milestoneName,
+            id,
+            oldStatus || 'unknown'
+          ).catch(err => console.error('Teams notification error:', err));
+        }
+      }
+
       return result;
     },
     onSuccess: (data: any) => {
