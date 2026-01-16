@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks';
 import { useApplyPreferences, usePreferencesStore } from '@/stores/preferencesStore';
@@ -17,6 +17,7 @@ import Dependencies from '@/pages/Dependencies';
 import QuickWins from '@/pages/QuickWins';
 import Settings from '@/pages/Settings';
 import Login from '@/pages/Login';
+import AcceptInvitation from '@/pages/AcceptInvitation';
 import MaturityDefinitions from '@/pages/MaturityDefinitions';
 import TechnologyOptions from '@/pages/TechnologyOptions';
 import QoLImpact from '@/pages/QoLImpact';
@@ -24,6 +25,7 @@ import RoadmapInventory from '@/pages/RoadmapInventory';
 import RoadmapProduction from '@/pages/RoadmapProduction';
 import RoadmapPlanning from '@/pages/RoadmapPlanning';
 import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
+import ActivityLog from '@/pages/ActivityLog';
 
 // Component to handle default view preference redirect
 function DefaultViewRoute() {
@@ -43,6 +45,7 @@ function DefaultViewRoute() {
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   // Apply user preferences (theme, compact mode)
   useApplyPreferences();
@@ -67,8 +70,22 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Public routes that don't require authentication
+  const isPublicRoute = location.pathname === '/accept-invitation';
+
   if (loading) {
     return <FullPageLoader text="Loading..." />;
+  }
+
+  // Handle public routes (accept-invitation)
+  if (isPublicRoute) {
+    return (
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/accept-invitation" element={<AcceptInvitation />} />
+        </Routes>
+      </ErrorBoundary>
+    );
   }
 
   if (!session) {
@@ -93,6 +110,7 @@ function App() {
           <Route path="/roadmap/production" element={<RoadmapProduction />} />
           <Route path="/roadmap/planning" element={<RoadmapPlanning />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/activity-log" element={<ActivityLog />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </MainLayout>

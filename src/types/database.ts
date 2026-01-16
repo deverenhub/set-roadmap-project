@@ -66,6 +66,7 @@ export interface Database {
           path_a_months: number | null;
           path_b_months: number | null;
           path_c_months: number | null;
+          timeline_offset: number | null;
           dependencies: string[] | null;
           deliverables: string[] | null;
           start_date: string | null;
@@ -85,6 +86,7 @@ export interface Database {
           path_a_months?: number | null;
           path_b_months?: number | null;
           path_c_months?: number | null;
+          timeline_offset?: number | null;
           dependencies?: string[] | null;
           deliverables?: string[] | null;
           start_date?: string | null;
@@ -104,6 +106,7 @@ export interface Database {
           path_a_months?: number | null;
           path_b_months?: number | null;
           path_c_months?: number | null;
+          timeline_offset?: number | null;
           dependencies?: string[] | null;
           deliverables?: string[] | null;
           start_date?: string | null;

@@ -19,6 +19,8 @@ export {
   useTimelineData,
   useCreateMilestone,
   useUpdateMilestone,
+  useUpdateMilestonePosition,
+  useUpdateMilestoneDuration,
   useDeleteMilestone,
   milestoneKeys,
 } from './useMilestones';
@@ -74,3 +76,62 @@ export {
   isSpeechRecognitionSupported,
 } from './useVoiceInput';
 export type { VoiceInputState } from './useVoiceInput';
+
+// Global Search
+export { useGlobalSearch } from './useGlobalSearch';
+export type { SearchResult } from './useGlobalSearch';
+
+// Activity Log
+export {
+  useActivityLog,
+  useInfiniteActivityLog,
+  useRecordActivity,
+  useUserActivity,
+  useActivityStats,
+  useInvalidateActivityLog,
+  formatActivityDescription,
+  formatTableName,
+  getChangedFields,
+  activityLogKeys,
+} from './useActivityLog';
+export type { ActivityLogFilters, ActivityStats } from './useActivityLog';
+
+// Teams Notifications
+export {
+  useTeamsNotification,
+  sendTeamsNotification,
+  notifyTeamsBlockedMilestone,
+  notifyTeamsMilestoneCompleted,
+  notifyTeamsActivity,
+} from './useTeamsNotifications';
+export type { TeamsNotificationType, TeamsNotificationData } from './useTeamsNotifications';
+
+// File Attachments
+export {
+  useAttachments,
+  useUploadAttachment,
+  useDeleteAttachment,
+  useAttachmentUrl,
+  useAttachmentCount,
+  getAttachmentUrl,
+  formatFileSize,
+  getFileIcon,
+  isImageType,
+  attachmentKeys,
+  ALLOWED_FILE_TYPES,
+  MAX_FILE_SIZE,
+} from './useAttachments';
+
+// User Invitations
+export {
+  useInvitations,
+  usePendingInvitations,
+  useInvitationByToken,
+  useSendInvitation,
+  useResendInvitation,
+  useRevokeInvitation,
+  useAcceptInvitation,
+  getInvitationStatus,
+  getTimeUntilExpiration,
+  invitationKeys,
+} from './useInvitations';

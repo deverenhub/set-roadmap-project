@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { sendMentionEmails } from '@/lib/email';
 import type { CommentInsert, CommentEntityType, CommentWithUser } from '@/types';
 
 // Query keys factory
@@ -87,6 +88,13 @@ export function useCreateComment() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Get current user's name for email
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
       const { data: result, error } = await supabase
         .from('comments')
         .insert({
@@ -100,6 +108,47 @@ export function useCreateComment() {
         .single();
 
       if (error) throw error;
+
+      // Send email notifications for mentions (fire and forget)
+      if (data.mentions && data.mentions.length > 0) {
+        // Get entity name for email
+        let entityName = 'an item';
+        if (data.entity_type === 'capability') {
+          const { data: cap } = await supabase
+            .from('capabilities')
+            .select('name')
+            .eq('id', data.entity_id)
+            .single();
+          entityName = cap?.name || entityName;
+        } else if (data.entity_type === 'milestone') {
+          const { data: ms } = await supabase
+            .from('milestones')
+            .select('name')
+            .eq('id', data.entity_id)
+            .single();
+          entityName = ms?.name || entityName;
+        } else if (data.entity_type === 'quick_win') {
+          const { data: qw } = await supabase
+            .from('quick_wins')
+            .select('name')
+            .eq('id', data.entity_id)
+            .single();
+          entityName = qw?.name || entityName;
+        }
+
+        // Filter out current user from mentions (don't email yourself)
+        const mentionsToEmail = data.mentions.filter(id => id !== user.id);
+
+        sendMentionEmails(
+          mentionsToEmail,
+          currentUser?.full_name || 'Someone',
+          entityName,
+          data.entity_type,
+          data.entity_id,
+          data.content
+        );
+      }
+
       return result;
     },
     onSuccess: (data: any) => {

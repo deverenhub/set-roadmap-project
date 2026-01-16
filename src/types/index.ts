@@ -45,6 +45,65 @@ export type NotificationInsert = Database['public']['Tables']['notifications']['
 export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 export type NotificationType = 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
 
+// Attachment types
+export type AttachmentEntityType = 'capability' | 'milestone' | 'quick_win';
+
+export interface Attachment {
+  id: string;
+  entity_type: AttachmentEntityType;
+  entity_id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  storage_path: string;
+  uploaded_by: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttachmentInsert {
+  entity_type: AttachmentEntityType;
+  entity_id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  storage_path: string;
+  uploaded_by?: string;
+  description?: string;
+}
+
+export interface AttachmentWithUser extends Attachment {
+  user?: Pick<User, 'id' | 'full_name' | 'email'> | null;
+}
+
+// Invitation types
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+export interface Invitation {
+  id: string;
+  email: string;
+  role: UserRole;
+  token: string;
+  invited_by: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvitationInsert {
+  email: string;
+  role: UserRole;
+  token: string;
+  invited_by?: string;
+  expires_at: string;
+}
+
+export interface InvitationWithInviter extends Invitation {
+  inviter?: Pick<User, 'id' | 'full_name' | 'email'> | null;
+}
+
 // Enum types
 export type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type Status = 'not_started' | 'in_progress' | 'completed' | 'blocked';

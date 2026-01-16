@@ -7,7 +7,6 @@
 - [ ] **Activity/Audit Log** - Track all changes to capabilities, milestones, and quick wins
 
 ### Medium Priority
-- [ ] **Global Search** - Search across capabilities, milestones, and quick wins
 - [ ] **File Attachments** - Attach files to capabilities and milestones
 - [ ] **User Invitation System** - Invite new users via email
 
@@ -17,6 +16,7 @@
 
 ## Completed
 
+- [x] **Global Search** - Search across capabilities, milestones, and quick wins with Cmd+K keyboard shortcut
 - [x] **PDF Export for Executive Reports** - Custom branded PDF with SET logo, application colors, and comprehensive executive summary
 - [x] **Comments System** - Threaded comments on capabilities, milestones, and quick wins
 - [x] **Notifications System** - Real-time in-app notifications with bell icon
