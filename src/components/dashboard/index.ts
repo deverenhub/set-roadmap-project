@@ -4,3 +4,4 @@ export * from './ProgressRing';
 export * from './RecentActivity';
 export * from './CriticalItems';
 export * from './QoLImpactChart';
+export * from './DashboardCustomizer';
