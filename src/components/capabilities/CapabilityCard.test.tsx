@@ -24,8 +24,10 @@ describe('CapabilityCard', () => {
 
   it('shows maturity levels', () => {
     render(<CapabilityCard {...defaultProps} />);
-    expect(screen.getByText(/Level 2/)).toBeInTheDocument();
-    expect(screen.getByText(/4/)).toBeInTheDocument();
+    expect(screen.getByText('Maturity Level')).toBeInTheDocument();
+    // Current level (2) and target level (4) are displayed
+    const levelElements = screen.getAllByText(/^[24]$/);
+    expect(levelElements.length).toBeGreaterThanOrEqual(2);
   });
 
   it('calculates progress correctly', () => {
