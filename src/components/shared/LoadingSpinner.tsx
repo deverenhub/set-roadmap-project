@@ -30,3 +30,11 @@ export function FullPageLoader({ text }: { text?: string }) {
     </div>
   );
 }
+
+export function PageLoader({ text = 'Loading...' }: { text?: string }) {
+  return (
+    <div className="flex h-full min-h-[400px] w-full items-center justify-center">
+      <LoadingSpinner size="md" text={text} />
+    </div>
+  );
+}

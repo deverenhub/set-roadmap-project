@@ -1,31 +1,33 @@
 // src/App.tsx
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks';
 import { useApplyPreferences, usePreferencesStore } from '@/stores/preferencesStore';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { FullPageLoader } from '@/components/shared/LoadingSpinner';
+import { FullPageLoader, PageLoader } from '@/components/shared/LoadingSpinner';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import type { Session } from '@supabase/supabase-js';
 
-// Lazy load pages for better performance
-import Dashboard from '@/pages/Dashboard';
-import Capabilities from '@/pages/Capabilities';
-import Timeline from '@/pages/Timeline';
-import Dependencies from '@/pages/Dependencies';
-import QuickWins from '@/pages/QuickWins';
-import Settings from '@/pages/Settings';
+// Keep Login static for immediate auth check
 import Login from '@/pages/Login';
-import AcceptInvitation from '@/pages/AcceptInvitation';
-import MaturityDefinitions from '@/pages/MaturityDefinitions';
-import TechnologyOptions from '@/pages/TechnologyOptions';
-import QoLImpact from '@/pages/QoLImpact';
-import RoadmapInventory from '@/pages/RoadmapInventory';
-import RoadmapProduction from '@/pages/RoadmapProduction';
-import RoadmapPlanning from '@/pages/RoadmapPlanning';
-import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
-import ActivityLog from '@/pages/ActivityLog';
+
+// Lazy load all other pages for code splitting
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Capabilities = lazy(() => import('@/pages/Capabilities'));
+const Timeline = lazy(() => import('@/pages/Timeline'));
+const Dependencies = lazy(() => import('@/pages/Dependencies'));
+const QuickWins = lazy(() => import('@/pages/QuickWins'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const AcceptInvitation = lazy(() => import('@/pages/AcceptInvitation'));
+const MaturityDefinitions = lazy(() => import('@/pages/MaturityDefinitions'));
+const TechnologyOptions = lazy(() => import('@/pages/TechnologyOptions'));
+const QoLImpact = lazy(() => import('@/pages/QoLImpact'));
+const RoadmapInventory = lazy(() => import('@/pages/RoadmapInventory'));
+const RoadmapProduction = lazy(() => import('@/pages/RoadmapProduction'));
+const RoadmapPlanning = lazy(() => import('@/pages/RoadmapPlanning'));
+const ExecutiveDashboard = lazy(() => import('@/pages/ExecutiveDashboard'));
+const ActivityLog = lazy(() => import('@/pages/ActivityLog'));
 
 // Component to handle default view preference redirect
 function DefaultViewRoute() {
@@ -38,7 +40,11 @@ function DefaultViewRoute() {
       return <Navigate to="/timeline" replace />;
     case 'overview':
     default:
-      return <Dashboard />;
+      return (
+        <Suspense fallback={<PageLoader />}>
+          <Dashboard />
+        </Suspense>
+      );
   }
 }
 
@@ -81,9 +87,11 @@ function App() {
   if (isPublicRoute) {
     return (
       <ErrorBoundary>
-        <Routes>
-          <Route path="/accept-invitation" element={<AcceptInvitation />} />
-        </Routes>
+        <Suspense fallback={<FullPageLoader text="Loading..." />}>
+          <Routes>
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
+          </Routes>
+        </Suspense>
       </ErrorBoundary>
     );
   }
@@ -95,24 +103,26 @@ function App() {
   return (
     <ErrorBoundary>
       <MainLayout>
-        <Routes>
-          <Route path="/" element={<DefaultViewRoute />} />
-          <Route path="/executive" element={<ExecutiveDashboard />} />
-          <Route path="/capabilities" element={<Capabilities />} />
-          <Route path="/capabilities/:id" element={<Capabilities />} />
-          <Route path="/timeline" element={<Timeline />} />
-          <Route path="/dependencies" element={<Dependencies />} />
-          <Route path="/quick-wins" element={<QuickWins />} />
-          <Route path="/maturity-definitions" element={<MaturityDefinitions />} />
-          <Route path="/technology-options" element={<TechnologyOptions />} />
-          <Route path="/qol-impact" element={<QoLImpact />} />
-          <Route path="/roadmap/inventory" element={<RoadmapInventory />} />
-          <Route path="/roadmap/production" element={<RoadmapProduction />} />
-          <Route path="/roadmap/planning" element={<RoadmapPlanning />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/activity-log" element={<ActivityLog />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<DefaultViewRoute />} />
+            <Route path="/executive" element={<ExecutiveDashboard />} />
+            <Route path="/capabilities" element={<Capabilities />} />
+            <Route path="/capabilities/:id" element={<Capabilities />} />
+            <Route path="/timeline" element={<Timeline />} />
+            <Route path="/dependencies" element={<Dependencies />} />
+            <Route path="/quick-wins" element={<QuickWins />} />
+            <Route path="/maturity-definitions" element={<MaturityDefinitions />} />
+            <Route path="/technology-options" element={<TechnologyOptions />} />
+            <Route path="/qol-impact" element={<QoLImpact />} />
+            <Route path="/roadmap/inventory" element={<RoadmapInventory />} />
+            <Route path="/roadmap/production" element={<RoadmapProduction />} />
+            <Route path="/roadmap/planning" element={<RoadmapPlanning />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/activity-log" element={<ActivityLog />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </MainLayout>
     </ErrorBoundary>
   );
