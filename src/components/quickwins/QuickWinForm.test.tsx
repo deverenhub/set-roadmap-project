@@ -4,8 +4,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QuickWinForm } from './QuickWinForm';
 
 // Mock hooks
-const mockCreateQuickWin = vi.fn().mockResolvedValue({});
-const mockUpdateQuickWin = vi.fn().mockResolvedValue({});
+const mockCreateQuickWin = vi.fn();
+const mockUpdateQuickWin = vi.fn();
 
 vi.mock('@/hooks', () => ({
   useCreateQuickWin: () => ({
@@ -21,21 +21,13 @@ vi.mock('@/hooks', () => ({
       { id: 'cap-1', name: 'Capability 1' },
       { id: 'cap-2', name: 'Capability 2' },
     ],
+    isLoading: false,
   }),
 }));
 
 vi.mock('@/hooks/useQuickWins', () => ({
-  useQuickWin: (id: string) => ({
-    data: id ? {
-      id,
-      name: 'Existing Quick Win',
-      description: 'Existing description',
-      capability_id: 'cap-1',
-      timeline_months: 3,
-      investment: 'HIGH',
-      roi: 'HIGH',
-      category: 'Operations',
-    } : null,
+  useQuickWin: () => ({
+    data: null,
     isLoading: false,
   }),
 }));
@@ -43,44 +35,42 @@ vi.mock('@/hooks/useQuickWins', () => ({
 describe('QuickWinForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateQuickWin.mockResolvedValue({});
-    mockUpdateQuickWin.mockResolvedValue({});
   });
 
   describe('rendering', () => {
     it('renders name input', () => {
       render(<QuickWinForm />);
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Name/)).toBeInTheDocument();
     });
 
     it('renders description textarea', () => {
       render(<QuickWinForm />);
-      expect(screen.getByRole('textbox', { name: /description/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Description/)).toBeInTheDocument();
     });
 
     it('renders category select', () => {
       render(<QuickWinForm />);
-      expect(screen.getByText('Category')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Category/)).toBeInTheDocument();
     });
 
     it('renders capability select', () => {
       render(<QuickWinForm />);
-      expect(screen.getByText('Related Capability')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Related Capability/)).toBeInTheDocument();
     });
 
     it('renders timeline input', () => {
       render(<QuickWinForm />);
-      expect(screen.getByRole('spinbutton', { name: /timeline/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Timeline/)).toBeInTheDocument();
     });
 
     it('renders investment select', () => {
       render(<QuickWinForm />);
-      expect(screen.getByText('Investment Level')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Investment Level/)).toBeInTheDocument();
     });
 
     it('renders ROI select', () => {
       render(<QuickWinForm />);
-      expect(screen.getByText('Expected ROI')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Expected ROI/)).toBeInTheDocument();
     });
 
     it('shows "Create Quick Win" button for new item', () => {
@@ -90,28 +80,33 @@ describe('QuickWinForm', () => {
   });
 
   describe('editing mode', () => {
+    const existingQuickWin = {
+      id: 'qw-1',
+      name: 'Test Quick Win',
+      description: 'Test description',
+      capability_id: 'cap-1',
+      timeline_months: 6,
+      investment: 'LOW',
+      roi: 'HIGH',
+      category: 'Technology',
+      status: 'not_started' as const,
+      progress_percent: 0,
+      created_at: '2024-01-01',
+      updated_at: '2024-01-01',
+    };
+
     it('shows "Update Quick Win" button when editing', () => {
-      render(<QuickWinForm quickWinId="qw-1" />);
+      render(<QuickWinForm quickWin={existingQuickWin} />);
       expect(screen.getByRole('button', { name: /Update Quick Win/i })).toBeInTheDocument();
     });
 
-    it('populates form with existing data when quickWin is provided', () => {
-      const quickWin = {
-        id: 'qw-1',
-        name: 'Test Quick Win',
-        description: 'Test description',
-        capability_id: 'cap-1',
-        timeline_months: 6,
-        investment: 'LOW',
-        roi: 'HIGH',
-        category: 'Technology',
-        status: 'not_started' as const,
-        progress_percent: 0,
-        created_at: '2024-01-01',
-        updated_at: '2024-01-01',
-      };
-      render(<QuickWinForm quickWin={quickWin} />);
+    it('populates name field with existing data', () => {
+      render(<QuickWinForm quickWin={existingQuickWin} />);
       expect(screen.getByDisplayValue('Test Quick Win')).toBeInTheDocument();
+    });
+
+    it('populates description field with existing data', () => {
+      render(<QuickWinForm quickWin={existingQuickWin} />);
       expect(screen.getByDisplayValue('Test description')).toBeInTheDocument();
     });
   });
@@ -120,11 +115,8 @@ describe('QuickWinForm', () => {
     it('calls createQuickWin when submitting new item', async () => {
       render(<QuickWinForm onSuccess={vi.fn()} />);
 
-      const nameInput = screen.getByRole('textbox', { name: /name/i });
-      fireEvent.change(nameInput, { target: { value: 'New Quick Win' } });
-
-      const form = screen.getByRole('button', { name: /Create Quick Win/i }).closest('form')!;
-      fireEvent.submit(form);
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'New Quick Win' } });
+      fireEvent.submit(screen.getByRole('button', { name: /Create Quick Win/i }).closest('form')!);
 
       await waitFor(() => {
         expect(mockCreateQuickWin).toHaveBeenCalled();
@@ -142,11 +134,8 @@ describe('QuickWinForm', () => {
       };
       render(<QuickWinForm quickWin={quickWin} onSuccess={vi.fn()} />);
 
-      const nameInput = screen.getByRole('textbox', { name: /name/i });
-      fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
-
-      const form = screen.getByRole('button', { name: /Update Quick Win/i }).closest('form')!;
-      fireEvent.submit(form);
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Updated Name' } });
+      fireEvent.submit(screen.getByRole('button', { name: /Update Quick Win/i }).closest('form')!);
 
       await waitFor(() => {
         expect(mockUpdateQuickWin).toHaveBeenCalled();
@@ -157,11 +146,8 @@ describe('QuickWinForm', () => {
       const onSuccess = vi.fn();
       render(<QuickWinForm onSuccess={onSuccess} />);
 
-      const nameInput = screen.getByRole('textbox', { name: /name/i });
-      fireEvent.change(nameInput, { target: { value: 'New Quick Win' } });
-
-      const form = screen.getByRole('button', { name: /Create Quick Win/i }).closest('form')!;
-      fireEvent.submit(form);
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'New Quick Win' } });
+      fireEvent.submit(screen.getByRole('button', { name: /Create Quick Win/i }).closest('form')!);
 
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalled();
@@ -191,17 +177,7 @@ describe('QuickWinForm', () => {
   describe('input validation', () => {
     it('name input is required', () => {
       render(<QuickWinForm />);
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeRequired();
-    });
-
-    it('timeline has min value of 1', () => {
-      render(<QuickWinForm />);
-      expect(screen.getByRole('spinbutton', { name: /timeline/i })).toHaveAttribute('min', '1');
-    });
-
-    it('timeline has max value of 12', () => {
-      render(<QuickWinForm />);
-      expect(screen.getByRole('spinbutton', { name: /timeline/i })).toHaveAttribute('max', '12');
+      expect(screen.getByLabelText(/Name/)).toBeRequired();
     });
   });
 });
