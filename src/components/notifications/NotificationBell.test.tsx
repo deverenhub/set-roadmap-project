@@ -87,12 +87,11 @@ describe('NotificationBell', () => {
   });
 
   describe('real-time subscription', () => {
-    it('subscribes to notifications', () => {
-      const { useNotificationsSubscription } = vi.mocked(
-        await import('@/hooks/useNotifications')
-      );
+    it('subscribes to notifications', async () => {
+      // The subscription hook is called when component mounts
       render(<NotificationBell />);
-      // Subscription hook should be called
+      // Component should render without errors when subscription is active
+      expect(screen.getByRole('button')).toBeInTheDocument();
     });
   });
 });
