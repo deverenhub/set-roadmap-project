@@ -1,7 +1,6 @@
 // src/components/capabilities/CapabilityForm.test.tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { CapabilityForm } from './CapabilityForm';
 
 // Mock hooks
@@ -119,7 +118,7 @@ describe('CapabilityForm', () => {
     it('calls createCapability when submitting new item', async () => {
       render(<CapabilityForm onSuccess={vi.fn()} />);
 
-      await userEvent.type(screen.getByLabelText(/Name/), 'New Capability');
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'New Capability' } });
       fireEvent.submit(screen.getByRole('button', { name: /Create Capability/i }).closest('form')!);
 
       await waitFor(() => {
@@ -146,8 +145,7 @@ describe('CapabilityForm', () => {
       };
       render(<CapabilityForm capability={capability} onSuccess={vi.fn()} />);
 
-      await userEvent.clear(screen.getByLabelText(/Name/));
-      await userEvent.type(screen.getByLabelText(/Name/), 'Updated Name');
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Updated Name' } });
       fireEvent.submit(screen.getByRole('button', { name: /Update Capability/i }).closest('form')!);
 
       await waitFor(() => {
@@ -164,7 +162,7 @@ describe('CapabilityForm', () => {
       const onSuccess = vi.fn();
       render(<CapabilityForm onSuccess={onSuccess} />);
 
-      await userEvent.type(screen.getByLabelText(/Name/), 'New Capability');
+      fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'New Capability' } });
       fireEvent.submit(screen.getByRole('button', { name: /Create Capability/i }).closest('form')!);
 
       await waitFor(() => {

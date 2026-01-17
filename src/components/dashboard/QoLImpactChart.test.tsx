@@ -77,8 +77,9 @@ describe('QoLImpactChart', () => {
 
     it('renders category labels', () => {
       render(<QoLImpactChart />);
-      expect(screen.getByText('Efficiency')).toBeInTheDocument();
-      expect(screen.getByText('Productivity')).toBeInTheDocument();
+      // Categories may appear multiple times (in list and summary)
+      expect(screen.getAllByText('Efficiency').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Productivity').length).toBeGreaterThan(0);
     });
 
     it('renders impact scores', () => {
@@ -108,9 +109,9 @@ describe('QoLImpactChart', () => {
   describe('summary stats', () => {
     it('renders summary stats section', () => {
       render(<QoLImpactChart />);
-      // Summary section shows category counts
-      expect(screen.getByText('Efficiency')).toBeInTheDocument();
-      expect(screen.getByText('Productivity')).toBeInTheDocument();
+      // Summary section shows category counts (categories appear multiple times)
+      expect(screen.getAllByText('Efficiency').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Productivity').length).toBeGreaterThan(0);
     });
   });
 });
