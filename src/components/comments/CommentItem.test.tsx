@@ -1,7 +1,6 @@
 // src/components/comments/CommentItem.test.tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CommentItem } from './CommentItem';
 
 // Mock hooks
@@ -187,15 +186,6 @@ describe('CommentItem', () => {
       // The MoreHorizontal button should be visible
       expect(screen.getByRole('button')).toBeInTheDocument();
     });
-
-    it('hides actions menu for non-owner', () => {
-      vi.doMock('@/hooks', () => ({
-        useCurrentUser: () => ({
-          data: { id: 'user-2' }, // Different user
-        }),
-      }));
-      // Note: Would need dynamic import for proper mock isolation
-    });
   });
 
   describe('edit functionality', () => {
@@ -210,10 +200,17 @@ describe('CommentItem', () => {
 
       // Open dropdown and click Edit
       fireEvent.click(screen.getByRole('button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Edit'));
 
       // Should show textarea in edit mode
-      expect(screen.getByDisplayValue('Test comment content')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Test comment content')).toBeInTheDocument();
+      });
     });
 
     it('shows Save and Cancel buttons when editing', async () => {
@@ -226,10 +223,17 @@ describe('CommentItem', () => {
       );
 
       fireEvent.click(screen.getByRole('button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Edit'));
 
-      expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Save')).toBeInTheDocument();
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
+      });
     });
 
     it('calls updateComment when Save clicked with changed content', async () => {
@@ -242,11 +246,19 @@ describe('CommentItem', () => {
       );
 
       fireEvent.click(screen.getByRole('button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Edit'));
 
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Test comment content')).toBeInTheDocument();
+      });
+
       const textarea = screen.getByDisplayValue('Test comment content');
-      await userEvent.clear(textarea);
-      await userEvent.type(textarea, 'Updated content');
+      fireEvent.change(textarea, { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByText('Save'));
 
       expect(mockUpdateComment).toHaveBeenCalledWith({
@@ -257,7 +269,7 @@ describe('CommentItem', () => {
       });
     });
 
-    it('cancels edit mode when Cancel clicked', () => {
+    it('cancels edit mode when Cancel clicked', async () => {
       render(
         <CommentItem
           comment={mockComment}
@@ -267,16 +279,28 @@ describe('CommentItem', () => {
       );
 
       fireEvent.click(screen.getByRole('button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Edit'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Cancel'));
 
       // Should show original content, not edit textarea
-      expect(screen.getByText('Test comment content')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Test comment content')).toBeInTheDocument();
+      });
     });
   });
 
   describe('delete functionality', () => {
-    it('calls deleteComment when Delete clicked', () => {
+    it('calls deleteComment when Delete clicked', async () => {
       render(
         <CommentItem
           comment={mockComment}
@@ -286,6 +310,11 @@ describe('CommentItem', () => {
       );
 
       fireEvent.click(screen.getByRole('button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Delete')).toBeInTheDocument();
+      });
+
       fireEvent.click(screen.getByText('Delete'));
 
       expect(mockDeleteComment).toHaveBeenCalledWith({
