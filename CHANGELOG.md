@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Code Splitting** - React.lazy() and Suspense for route-based code splitting
 - **Comments System** - Threaded comments on capabilities, milestones, and quick wins with @mentions support
 - **Notifications System** - Real-time in-app notifications with bell icon in header
 - **Milestone Detail Modal** - Full milestone view with status change buttons and comments
@@ -27,7 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Impact simulation calculates estimates from actual workload data
 - Dashboard layout improvements with better responsive design
 
+### Performance
+- **Bundle Size Reduction** - Initial bundle reduced from 3.2MB to 248KB (92% reduction)
+- **Vite Manual Chunks** - Vendor splitting for react, supabase, recharts, reactflow, react-pdf, date-fns, dnd-kit
+- **Preconnect Hints** - Added preconnect/dns-prefetch for Supabase API and Google Fonts
+- **Async Font Loading** - Non-render-blocking font loading with media="print" onload pattern
+- **Font Optimization** - Removed unused font-weight 300, reduced font file downloads
+
 ### Fixed
+- QuickWinForm test hanging issues with simplified mock setup
 - Export Report and Copy Summary buttons now work with proper error handling
 - Clipboard API fallback for browsers that block direct clipboard access
 - Download link cleanup timing issue that prevented file downloads
