@@ -30,6 +30,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -225,6 +226,7 @@ export function AttachmentsList({ entityType, entityId, className }: Attachments
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>{previewName}</DialogTitle>
+            <DialogDescription>Image preview</DialogDescription>
           </DialogHeader>
           {previewUrl && (
             <div className="flex items-center justify-center max-h-[70vh] overflow-auto">

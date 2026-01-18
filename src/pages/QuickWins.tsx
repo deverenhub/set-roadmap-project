@@ -5,7 +5,7 @@ import { KanbanBoard, QuickWinForm, QuickWinDetailModal } from '@/components/qui
 import { useQuickWinStats, usePermissions } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function QuickWins() {
@@ -99,6 +99,9 @@ export default function QuickWins() {
             <DialogTitle>
               {editingQuickWinId ? 'Edit Quick Win' : 'Add New Quick Win'}
             </DialogTitle>
+            <DialogDescription>
+              {editingQuickWinId ? 'Update the quick win details below.' : 'Create a new quick win initiative.'}
+            </DialogDescription>
           </DialogHeader>
           <QuickWinForm
             quickWinId={editingQuickWinId}

@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 
 interface CapabilityListProps {
@@ -140,6 +141,7 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Add New Capability</DialogTitle>
+            <DialogDescription>Create a new capability to track in the roadmap.</DialogDescription>
           </DialogHeader>
           <CapabilityForm onSuccess={() => setIsFormOpen(false)} />
         </DialogContent>

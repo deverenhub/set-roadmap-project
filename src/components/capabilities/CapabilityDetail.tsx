@@ -8,7 +8,7 @@ import { Badge, PriorityBadge, StatusBadge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { CapabilityForm } from './CapabilityForm';
 import { MaturityIndicator } from './MaturityIndicator';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -303,6 +303,7 @@ export function CapabilityDetail({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Capability</DialogTitle>
+            <DialogDescription>Update the capability details below.</DialogDescription>
           </DialogHeader>
           <CapabilityForm
             capability={capability}
