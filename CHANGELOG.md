@@ -35,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Async Font Loading** - Non-render-blocking font loading with media="print" onload pattern
 - **Font Optimization** - Removed unused font-weight 300, reduced font file downloads
 
+### Accessibility
+- **VisuallyHidden Component** - New utility component for screen reader accessible text
+- **Dialog Accessibility** - Added DialogTitle and DialogDescription to all dialogs for screen readers
+- Fixed CommandDialog missing accessible title and description
+- Fixed CapabilityDetail, CapabilityList, AttachmentsList, and QuickWins dialog accessibility
+
 ### Fixed
 - QuickWinForm test hanging issues with simplified mock setup
 - Export Report and Copy Summary buttons now work with proper error handling
