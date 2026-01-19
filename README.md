@@ -4,6 +4,7 @@ An AI-powered interactive roadmap platform for Southeast Toyota Vehicle Processi
 
 ## Features
 
+### Core Features
 - **Dashboard**: Real-time KPIs, progress tracking, and activity feed
 - **Capability Management**: Track and manage operational capabilities with maturity levels (1-5)
 - **Timeline Visualization**: Interactive Gantt charts with Path A/B/C scenarios
@@ -11,6 +12,21 @@ An AI-powered interactive roadmap platform for Southeast Toyota Vehicle Processi
 - **Quick Wins Kanban**: Drag-and-drop board for short-term initiatives
 - **AI Chat Assistant**: Natural language queries powered by MCP (Model Context Protocol)
 - **Real-time Updates**: Live synchronization across all users
+
+### Multi-Facility Support
+- **Facility Management**: Support for multiple VPC locations (Westlake FL, Commerce GA, Blount Island FL)
+- **Facility Context Switching**: Seamless switching between facilities with persistent selection
+- **Facility-Scoped Data**: All capabilities, milestones, and quick wins scoped to specific facilities
+- **Enterprise Capabilities**: Shared capabilities that apply across all facilities
+- **Capability Templates**: Standardized templates for onboarding new facilities
+- **Role-Based Access**: Facility-level roles (viewer, editor, facility_admin)
+- **Executive Dashboard**: Cross-facility overview with aggregated metrics
+
+### Strategic Roadmap
+- **Three Missions Framework**: Capabilities organized under Mission I (Setting the Standard), Mission II (Flexible Operations), and Mission III (Evolving Workforce)
+- **AutoCAD Integration**: Facility design and layout management tracking
+- **Simio Integration**: Process simulation and optimization tracking
+- **11 Strategic Capabilities**: Value Stream Mapping, Production Monitoring, Quality Assurance, and more
 
 ## Tech Stack
 
@@ -80,16 +96,19 @@ src/
 │   ├── capabilities/ # Capability management components
 │   ├── diagrams/     # React Flow and chart components
 │   ├── quickwins/    # Kanban board components
+│   ├── facilities/   # Facility management components
 │   ├── chat/         # AI chat interface
+│   ├── layout/       # Layout components (FacilitySelector, etc.)
 │   └── shared/       # Shared utilities (ErrorBoundary, etc.)
 ├── hooks/            # Custom React hooks
 ├── lib/              # Utilities and Supabase client
 ├── pages/            # Page components
-├── stores/           # Zustand stores
+├── providers/        # Context providers (FacilityProvider)
+├── stores/           # Zustand stores (facilityStore, preferencesStore)
 └── types/            # TypeScript definitions
 
 supabase/
-├── functions/        # Edge functions (MCP server)
+├── functions/        # Edge functions (MCP server, AI chat)
 ├── migrations/       # Database migrations
 └── seed.sql          # Seed data
 ```
