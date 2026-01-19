@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { sendBlockedMilestoneEmails } from '@/lib/email';
 import { notifyTeamsBlockedMilestone, notifyTeamsMilestoneCompleted } from './useTeamsNotifications';
 import { usePreferencesStore } from '@/stores/preferencesStore';
+import { useFacilityStore } from '@/stores/facilityStore';
 import type { Milestone, MilestoneInsert, MilestoneUpdate, MilestoneWithCapability } from '@/types';
 import { capabilityKeys } from './useCapabilities';
 
@@ -16,27 +17,44 @@ export const milestoneKeys = {
   byCapability: (capabilityId: string) => [...milestoneKeys.all, 'capability', capabilityId] as const,
   details: () => [...milestoneKeys.all, 'detail'] as const,
   detail: (id: string) => [...milestoneKeys.details(), id] as const,
-  timeline: (path: string) => [...milestoneKeys.all, 'timeline', path] as const,
+  timeline: (path: string, facilityId?: string | null) => [...milestoneKeys.all, 'timeline', path, facilityId] as const,
 };
 
 interface MilestoneFilters {
   capabilityId?: string | null;
   status?: string | null;
+  facilityId?: string | null;
   [key: string]: string | null | undefined;
 }
 
 // Fetch all milestones with optional filters
+// If facilityId is not provided, uses current facility from store
 export function useMilestones(filters: MilestoneFilters = {}) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = filters.facilityId !== undefined ? filters.facilityId : currentFacilityId;
+
+  const effectiveFilters = {
+    ...filters,
+    facilityId: effectiveFacilityId,
+  };
+
   return useQuery({
-    queryKey: milestoneKeys.list(filters),
+    queryKey: milestoneKeys.list(effectiveFilters),
     queryFn: async (): Promise<MilestoneWithCapability[]> => {
       let query = supabase
         .from('milestones')
         .select(`
           *,
-          capability:capabilities(id, name, priority, color)
+          capability:capabilities(id, name, priority, color, facility_id, is_enterprise)
         `)
         .order('from_level', { ascending: true });
+
+      // Facility filtering - filter milestones by their direct facility_id
+      if (effectiveFacilityId) {
+        query = query.eq('facility_id', effectiveFacilityId);
+      }
 
       if (filters.capabilityId) {
         query = query.eq('capability_id', filters.capabilityId);
@@ -72,37 +90,45 @@ export function useMilestonesByCapability(capabilityId: string) {
 }
 
 // Fetch single milestone by ID
-export function useMilestone(id: string) {
+export function useMilestone(id: string | null) {
   return useQuery({
-    queryKey: milestoneKeys.detail(id),
-    queryFn: async () => {
+    queryKey: milestoneKeys.detail(id || ''),
+    queryFn: async (): Promise<MilestoneWithCapability | null> => {
+      if (!id) return null;
+
       const { data, error } = await supabase
         .from('milestones')
         .select(`
           *,
-          capability:capabilities(*)
+          capability:capabilities(id, name, priority, color)
         `)
         .eq('id', id)
         .single();
 
       if (error) throw error;
-      return data;
+      return data as MilestoneWithCapability;
     },
     enabled: !!id,
   });
 }
 
 // Timeline data for Gantt chart
-export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
+// If facilityId is not provided, uses current facility from store
+export function useTimelineData(path: 'A' | 'B' | 'C' = 'B', facilityId?: string | null) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = facilityId !== undefined ? facilityId : currentFacilityId;
+
   return useQuery({
-    queryKey: milestoneKeys.timeline(path),
+    queryKey: milestoneKeys.timeline(path, effectiveFacilityId),
     queryFn: async () => {
       // First try with timeline_offset, fallback to without if column doesn't exist
       let data;
       let error;
 
-      // Try fetching with timeline_offset column
-      const result = await supabase
+      // Build base query with facility filtering
+      let baseQuery = supabase
         .from('milestones')
         .select(`
           id,
@@ -114,13 +140,21 @@ export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
           path_b_months,
           path_c_months,
           timeline_offset,
-          capability:capabilities(id, name, color, priority)
+          facility_id,
+          capability:capabilities(id, name, color, priority, facility_id, is_enterprise)
         `)
         .order('from_level', { ascending: true });
 
+      // Apply facility filter
+      if (effectiveFacilityId) {
+        baseQuery = baseQuery.eq('facility_id', effectiveFacilityId);
+      }
+
+      const result = await baseQuery;
+
       // If timeline_offset column doesn't exist, query without it
       if (result.error && result.error.message.includes('timeline_offset')) {
-        const fallbackResult = await supabase
+        let fallbackQuery = supabase
           .from('milestones')
           .select(`
             id,
@@ -131,10 +165,17 @@ export function useTimelineData(path: 'A' | 'B' | 'C' = 'B') {
             path_a_months,
             path_b_months,
             path_c_months,
-            capability:capabilities(id, name, color, priority)
+            facility_id,
+            capability:capabilities(id, name, color, priority, facility_id, is_enterprise)
           `)
           .order('from_level', { ascending: true });
 
+        // Apply facility filter to fallback query too
+        if (effectiveFacilityId) {
+          fallbackQuery = fallbackQuery.eq('facility_id', effectiveFacilityId);
+        }
+
+        const fallbackResult = await fallbackQuery;
         data = fallbackResult.data;
         error = fallbackResult.error;
       } else {
@@ -231,14 +272,22 @@ export function useUpdateMilestoneDuration() {
 }
 
 // Create milestone
+// Automatically assigns to current facility if not specified
 export function useCreateMilestone() {
   const queryClient = useQueryClient();
+  const { currentFacilityId } = useFacilityStore();
 
   return useMutation({
     mutationFn: async (data: MilestoneInsert) => {
+      // Assign to current facility if not explicitly set
+      const insertData = {
+        ...data,
+        facility_id: data.facility_id !== undefined ? data.facility_id : currentFacilityId,
+      };
+
       const { data: result, error } = await supabase
         .from('milestones')
-        .insert(data)
+        .insert(insertData)
         .select()
         .single();
 

@@ -45,6 +45,29 @@ export type NotificationInsert = Database['public']['Tables']['notifications']['
 export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 export type NotificationType = 'comment' | 'mention' | 'status_change' | 'blocked' | 'milestone_due' | 'assignment' | 'system';
 
+// Facility types (Multi-facility support)
+export type Facility = Database['public']['Tables']['facilities']['Row'];
+export type FacilityInsert = Database['public']['Tables']['facilities']['Insert'];
+export type FacilityUpdate = Database['public']['Tables']['facilities']['Update'];
+
+export type UserFacility = Database['public']['Tables']['user_facilities']['Row'];
+export type UserFacilityInsert = Database['public']['Tables']['user_facilities']['Insert'];
+export type UserFacilityUpdate = Database['public']['Tables']['user_facilities']['Update'];
+
+export type CapabilityTemplate = Database['public']['Tables']['capability_templates']['Row'];
+export type CapabilityTemplateInsert = Database['public']['Tables']['capability_templates']['Insert'];
+export type CapabilityTemplateUpdate = Database['public']['Tables']['capability_templates']['Update'];
+
+export type CapabilityFacilityProgress = Database['public']['Tables']['capability_facility_progress']['Row'];
+export type CapabilityFacilityProgressInsert = Database['public']['Tables']['capability_facility_progress']['Insert'];
+export type CapabilityFacilityProgressUpdate = Database['public']['Tables']['capability_facility_progress']['Update'];
+
+// Facility-related enums
+export type FacilityStatus = 'active' | 'planning' | 'onboarding' | 'inactive';
+export type FacilityRole = 'viewer' | 'editor' | 'facility_admin';
+export type Mission = 'mission_1' | 'mission_2' | 'mission_3';
+export type CapabilityCategory = 'operations' | 'technology' | 'process';
+
 // Attachment types
 export type AttachmentEntityType = 'capability' | 'milestone' | 'quick_win';
 
@@ -139,6 +162,27 @@ export interface NotificationWithActor extends Notification {
   actor?: Pick<User, 'id' | 'full_name' | 'email'> | null;
 }
 
+// Facility extended types
+export interface FacilityWithStats extends Facility {
+  capability_count?: number;
+  milestone_count?: number;
+  quick_win_count?: number;
+  user_count?: number;
+}
+
+export interface UserFacilityWithDetails extends UserFacility {
+  facility?: Facility;
+  user?: Pick<User, 'id' | 'full_name' | 'email'>;
+}
+
+export interface CapabilityWithFacility extends Capability {
+  facility?: Pick<Facility, 'id' | 'code' | 'name'> | null;
+}
+
+export interface CapabilityTemplateWithProgress extends CapabilityTemplate {
+  facility_progress?: CapabilityFacilityProgress[];
+}
+
 // Dashboard types
 export interface DashboardKPIs {
   overallProgress: number;
@@ -211,17 +255,28 @@ export interface CapabilityFilters {
   priority?: Priority | null;
   owner?: string | null;
   search?: string;
+  facilityId?: string | null;
+  mission?: Mission | null;
+  isEnterprise?: boolean | null;
 }
 
 export interface MilestoneFilters {
   capabilityId?: string | null;
   status?: Status | null;
+  facilityId?: string | null;
 }
 
 export interface QuickWinFilters {
   status?: Status | null;
   capabilityId?: string | null;
   category?: string | null;
+  facilityId?: string | null;
+}
+
+export interface FacilityFilters {
+  status?: FacilityStatus | null;
+  search?: string;
+  [key: string]: string | null | undefined;
 }
 
 // API response types

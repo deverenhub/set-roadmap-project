@@ -4,6 +4,7 @@ import { Plus, Filter, Search } from 'lucide-react';
 import { useCapabilities, usePermissions } from '@/hooks';
 import { CapabilityCard } from './CapabilityCard';
 import { CapabilityForm } from './CapabilityForm';
+import { MissionFilter } from './MissionFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +22,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import type { Mission } from '@/types';
 
 interface CapabilityListProps {
   onCapabilityClick?: (id: string) => void;
@@ -28,12 +30,14 @@ interface CapabilityListProps {
 
 export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [missionFilter, setMissionFilter] = useState<Mission | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { canEdit } = usePermissions();
 
   const { data: capabilities, isLoading } = useCapabilities({
     priority: priorityFilter,
+    mission: missionFilter,
   });
 
   // Filter by search term
@@ -63,8 +67,8 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
     <div className="space-y-6">
       {/* Header and filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search capabilities..."
@@ -73,6 +77,11 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
               className="pl-9"
             />
           </div>
+          <MissionFilter
+            value={missionFilter}
+            onChange={setMissionFilter}
+            className="w-44"
+          />
           <Select
             value={priorityFilter || 'all'}
             onValueChange={(v) => setPriorityFilter(v === 'all' ? null : v)}
@@ -103,11 +112,11 @@ export function CapabilityList({ onCapabilityClick }: CapabilityListProps) {
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <p className="text-lg font-medium">No capabilities found</p>
           <p className="text-muted-foreground">
-            {searchTerm || priorityFilter
+            {searchTerm || priorityFilter || missionFilter
               ? 'Try adjusting your filters'
               : 'Get started by adding your first capability'}
           </p>
-          {!searchTerm && !priorityFilter && canEdit && (
+          {!searchTerm && !priorityFilter && !missionFilter && canEdit && (
             <Button className="mt-4" onClick={() => setIsFormOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Capability

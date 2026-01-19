@@ -91,6 +91,8 @@ describe('QuickWinForm', () => {
       category: 'Technology',
       status: 'not_started' as const,
       progress_percent: 0,
+      order: 0,
+      facility_id: null,
       created_at: '2024-01-01',
       updated_at: '2024-01-01',
     };
@@ -127,8 +129,16 @@ describe('QuickWinForm', () => {
       const quickWin = {
         id: 'qw-1',
         name: 'Test',
+        description: null,
+        capability_id: null,
+        timeline_months: 3,
+        investment: null,
+        roi: null,
+        category: null,
         status: 'not_started' as const,
         progress_percent: 0,
+        order: 0,
+        facility_id: null,
         created_at: '2024-01-01',
         updated_at: '2024-01-01',
       };

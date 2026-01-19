@@ -135,3 +135,32 @@ export {
   getTimeUntilExpiration,
   invitationKeys,
 } from './useInvitations';
+
+// Facilities (Multi-facility support)
+export {
+  useAllFacilities,
+  useUserFacilities,
+  useFacilityInit,
+  useFacility,
+  useFacilityByCode,
+  useCreateFacility,
+  useUpdateFacility,
+  useDeleteFacility,
+  useAssignUserToFacility,
+  useRemoveUserFromFacility,
+  useUpdateUserFacilityRole,
+  useFacilityUsers,
+  facilityKeys,
+} from './useFacilities';
+
+// Capability Templates
+export {
+  useCapabilityTemplates,
+  useCapabilityTemplate,
+  useCapabilityTemplatesByMission,
+  useCreateCapabilityTemplate,
+  useUpdateCapabilityTemplate,
+  useDeleteCapabilityTemplate,
+  useInstantiateTemplates,
+  capabilityTemplateKeys,
+} from './useCapabilityTemplates';

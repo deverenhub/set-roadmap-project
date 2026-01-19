@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useFacilityStore } from '@/stores/facilityStore';
 import type { QuickWin, QuickWinInsert, QuickWinUpdate, QuickWinWithCapability, Status } from '@/types';
 
 // Query keys factory
@@ -10,31 +11,48 @@ export const quickWinKeys = {
   lists: () => [...quickWinKeys.all, 'list'] as const,
   list: (filters: Record<string, unknown>) => [...quickWinKeys.lists(), filters] as const,
   byStatus: (status: string) => [...quickWinKeys.all, 'status', status] as const,
-  grouped: () => [...quickWinKeys.all, 'grouped'] as const,
+  grouped: (facilityId?: string | null) => [...quickWinKeys.all, 'grouped', facilityId] as const,
   details: () => [...quickWinKeys.all, 'detail'] as const,
   detail: (id: string) => [...quickWinKeys.details(), id] as const,
-  stats: () => [...quickWinKeys.all, 'stats'] as const,
+  stats: (facilityId?: string | null) => [...quickWinKeys.all, 'stats', facilityId] as const,
 };
 
 interface QuickWinFilters {
   status?: string | null;
   capabilityId?: string | null;
   category?: string | null;
+  facilityId?: string | null;
   [key: string]: string | null | undefined;
 }
 
 // Fetch all quick wins with optional filters
+// If facilityId is not provided, uses current facility from store
 export function useQuickWins(filters: QuickWinFilters = {}) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = filters.facilityId !== undefined ? filters.facilityId : currentFacilityId;
+
+  const effectiveFilters = {
+    ...filters,
+    facilityId: effectiveFacilityId,
+  };
+
   return useQuery({
-    queryKey: quickWinKeys.list(filters),
+    queryKey: quickWinKeys.list(effectiveFilters),
     queryFn: async (): Promise<QuickWinWithCapability[]> => {
       let query = supabase
         .from('quick_wins')
         .select(`
           *,
-          capability:capabilities(id, name)
+          capability:capabilities(id, name, facility_id, is_enterprise)
         `)
         .order('order', { ascending: true });
+
+      // Facility filtering - filter quick wins by their direct facility_id
+      if (effectiveFacilityId) {
+        query = query.eq('facility_id', effectiveFacilityId);
+      }
 
       if (filters.status) {
         query = query.eq('status', filters.status);
@@ -55,17 +73,30 @@ export function useQuickWins(filters: QuickWinFilters = {}) {
 }
 
 // Fetch quick wins grouped by status (for Kanban)
-export function useQuickWinsGrouped() {
+// If facilityId is not provided, uses current facility from store
+export function useQuickWinsGrouped(facilityId?: string | null) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = facilityId !== undefined ? facilityId : currentFacilityId;
+
   return useQuery({
-    queryKey: quickWinKeys.grouped(),
+    queryKey: quickWinKeys.grouped(effectiveFacilityId),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('quick_wins')
         .select(`
           *,
-          capability:capabilities(id, name)
+          capability:capabilities(id, name, facility_id, is_enterprise)
         `)
         .order('order', { ascending: true });
+
+      // Facility filtering
+      if (effectiveFacilityId) {
+        query = query.eq('facility_id', effectiveFacilityId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -90,13 +121,26 @@ export function useQuickWinsGrouped() {
 }
 
 // Get quick win statistics
-export function useQuickWinStats() {
+// If facilityId is not provided, uses current facility from store
+export function useQuickWinStats(facilityId?: string | null) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = facilityId !== undefined ? facilityId : currentFacilityId;
+
   return useQuery({
-    queryKey: quickWinKeys.stats(),
+    queryKey: quickWinKeys.stats(effectiveFacilityId),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('quick_wins')
-        .select('status, roi');
+        .select('status, roi, facility_id, capability:capabilities(facility_id, is_enterprise)');
+
+      // Facility filtering
+      if (effectiveFacilityId) {
+        query = query.eq('facility_id', effectiveFacilityId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -109,7 +153,7 @@ export function useQuickWinStats() {
         high_roi: 0,
       };
 
-      (data || []).forEach((qw) => {
+      (data || []).forEach((qw: any) => {
         const status = qw.status as keyof typeof stats;
         if (status in stats) {
           stats[status]++;
@@ -125,29 +169,33 @@ export function useQuickWinStats() {
 }
 
 // Fetch single quick win by ID
-export function useQuickWin(id: string) {
+export function useQuickWin(id: string | null) {
   return useQuery({
-    queryKey: quickWinKeys.detail(id),
-    queryFn: async () => {
+    queryKey: quickWinKeys.detail(id || ''),
+    queryFn: async (): Promise<QuickWinWithCapability | null> => {
+      if (!id) return null;
+
       const { data, error } = await supabase
         .from('quick_wins')
         .select(`
           *,
-          capability:capabilities(*)
+          capability:capabilities(id, name)
         `)
         .eq('id', id)
         .single();
 
       if (error) throw error;
-      return data;
+      return data as QuickWinWithCapability;
     },
     enabled: !!id,
   });
 }
 
 // Create quick win
+// Automatically assigns to current facility if not specified
 export function useCreateQuickWin() {
   const queryClient = useQueryClient();
+  const { currentFacilityId } = useFacilityStore();
 
   return useMutation({
     mutationFn: async (data: QuickWinInsert) => {
@@ -162,9 +210,16 @@ export function useCreateQuickWin() {
 
       const newOrder = (maxOrder?.order || 0) + 1;
 
+      // Assign to current facility if not explicitly set
+      const insertData = {
+        ...data,
+        order: newOrder,
+        facility_id: data.facility_id !== undefined ? data.facility_id : currentFacilityId,
+      };
+
       const { data: result, error } = await supabase
         .from('quick_wins')
-        .insert({ ...data, order: newOrder })
+        .insert(insertData)
         .select()
         .single();
 

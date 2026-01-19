@@ -28,7 +28,7 @@ const INVESTMENT_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 const ROI_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 
 export function QuickWinForm({ quickWin: initialQuickWin, quickWinId, onSuccess, onCancel }: QuickWinFormProps) {
-  const { data: fetchedQuickWin, isLoading: isLoadingQuickWin } = useQuickWin(quickWinId || '');
+  const { data: fetchedQuickWin, isLoading: isLoadingQuickWin } = useQuickWin(quickWinId ?? null);
   const quickWin = initialQuickWin || fetchedQuickWin;
   const isEditing = !!quickWin || !!quickWinId;
   const { data: capabilities } = useCapabilities();

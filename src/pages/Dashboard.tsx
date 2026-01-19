@@ -161,14 +161,14 @@ export default function Dashboard() {
               return (
                 <div
                   key={cap.id}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-set-teal-50 hover:border-set-teal-200 cursor-pointer transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-set-teal-50 hover:border-set-teal-200 cursor-pointer transition-colors"
                   onClick={() => navigate(`/capabilities/${cap.id}`)}
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{cap.name}</span>
+                      <span className="font-medium truncate">{cap.name}</span>
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
+                        className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
                           cap.priority === 'CRITICAL'
                             ? 'bg-red-100 text-red-700'
                             : cap.priority === 'HIGH'
@@ -183,8 +183,8 @@ export default function Dashboard() {
                       Level {cap.current_level} → {cap.target_level}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-32">
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="w-24 hidden sm:block">
                       <div className="h-2 bg-set-teal-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-set-teal-500 rounded-full transition-all"
@@ -192,7 +192,7 @@ export default function Dashboard() {
                         />
                       </div>
                     </div>
-                    <span className="text-sm font-medium w-12 text-right">
+                    <span className="text-sm font-medium w-10 text-right">
                       {progress}%
                     </span>
                   </div>

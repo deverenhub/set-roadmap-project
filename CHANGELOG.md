@@ -8,6 +8,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Multi-Facility Support** - Enterprise platform supporting multiple SET facilities
+  - Database migration with facilities, user_facilities, capability_templates, and capability_facility_progress tables
+  - Added facility_id and mission columns to capabilities, milestones, quick_wins, and notifications
+  - Seeded three facilities: Westlake FL (WLK, maturity 4.0), Commerce GA (CMR), Blount Island FL (BLI)
+  - 11 capability templates organized by three strategic missions from original TSVMap proposals
+  - Row Level Security (RLS) policies for facility-scoped data access
+  - FacilityStore (Zustand) for client-side facility state management with persistence
+  - useFacilities, useFacility, useFacilityByCode hooks for data fetching
+  - FacilitySelector component in header for switching between facilities
+  - FacilitySelectorCompact for collapsed sidebar view
+  - FacilityBadge component showing current facility in sidebar
+  - Support for viewer, editor, and facility_admin roles per facility
+  - FacilityProvider context wrapper for facility initialization
+  - /facilities admin page for facility management (admin only)
+  - FacilityForm component for creating/editing facilities
+  - FacilityCard component with facility stats and status display
+  - FacilityOnboarding wizard with 4 steps (Facility Info, Select Missions, Configure Templates, Review & Launch)
+  - Admin-only navigation filter for sidebar links
+  - MissionFilter component for filtering capabilities by strategic mission
+  - MissionBadge component for displaying mission labels
+  - Mission filtering in Capabilities list view with three missions:
+    - Mission I: Setting the Standard (VSM, Production Monitoring, Quality, AutoCAD, Simio)
+    - Mission II: Flexible, Resilient Operations (Vehicle Movement, Work Management, Digital Twin)
+    - Mission III: Evolving our Workforce (Workforce Training, Knowledge Management, Additive Manufacturing)
+  - Auto-facility assignment for new capabilities, milestones, and quick wins
+  - All data hooks now support facility filtering with auto-fallback to current facility
+  - useCapabilityTemplates hook for template CRUD operations and instantiation
+  - instantiate_capability_templates database function for creating capabilities from templates
+- **AutoCAD & Simio Integration** (from TSVMap Proposals 1 & 2)
+  - Facility Design & Layout Management capability (AutoCAD) with 4 milestones
+  - Process Simulation & Optimization capability (Simio) with 4 milestones
+  - Digital Twin Evolution capability with 4 milestones for AutoCAD/Simio integration
+  - Dependencies between AutoCAD, Simio, and Digital Twin milestones
+  - All 11 strategic capabilities created for Westlake facility with appropriate mission assignments
+- **Enterprise Dashboard** - Cross-facility comparison view for admins
+  - CrossFacilityView component with enterprise-wide metrics
+  - Facility comparison cards with maturity, milestone progress, and health status
+  - Maturity level comparison bar chart across facilities
+  - Mission progress radar chart comparing all facilities
+  - Mission progress table with detailed breakdown by facility
+  - Enterprise tab in Executive Dashboard (admin only)
 - **Code Splitting** - React.lazy() and Suspense for route-based code splitting
 - **Comments System** - Threaded comments on capabilities, milestones, and quick wins with @mentions support
 - **Notifications System** - Real-time in-app notifications with bell icon in header

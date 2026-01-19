@@ -65,7 +65,7 @@ export function MilestoneDetailModal({
   onOpenChange,
   onEdit,
 }: MilestoneDetailModalProps) {
-  const { data: milestone, isLoading } = useMilestone(milestoneId || '');
+  const { data: milestone, isLoading } = useMilestone(milestoneId);
   const { data: attachmentCount } = useAttachmentCount('milestone', milestoneId || '');
   const deleteMilestone = useDeleteMilestone();
   const updateMilestone = useUpdateMilestone();

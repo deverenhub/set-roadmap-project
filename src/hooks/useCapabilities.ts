@@ -2,7 +2,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import type { Capability, CapabilityInsert, CapabilityUpdate } from '@/types';
+import { useFacilityStore } from '@/stores/facilityStore';
+import type { Capability, CapabilityInsert, CapabilityUpdate, Mission } from '@/types';
 
 // Query keys factory
 export const capabilityKeys = {
@@ -16,7 +17,11 @@ export const capabilityKeys = {
 interface CapabilityFilters {
   priority?: string | null;
   owner?: string | null;
-  [key: string]: string | null | undefined;
+  facilityId?: string | null;
+  mission?: Mission | null;
+  isEnterprise?: boolean | null;
+  includeEnterprise?: boolean; // Include enterprise capabilities in facility view
+  [key: string]: string | boolean | null | undefined;
 }
 
 interface CapabilityWithCounts extends Capability {
@@ -26,9 +31,22 @@ interface CapabilityWithCounts extends Capability {
 }
 
 // Fetch all capabilities with optional filters
+// If facilityId is not provided, uses current facility from store
 export function useCapabilities(filters: CapabilityFilters = {}) {
+  const { currentFacilityId } = useFacilityStore();
+
+  // Use provided facilityId or fall back to current facility
+  const effectiveFacilityId = filters.facilityId !== undefined ? filters.facilityId : currentFacilityId;
+  const includeEnterprise = filters.includeEnterprise !== false; // Default to true
+
+  const effectiveFilters = {
+    ...filters,
+    facilityId: effectiveFacilityId,
+    includeEnterprise,
+  };
+
   return useQuery({
-    queryKey: capabilityKeys.list(filters),
+    queryKey: capabilityKeys.list(effectiveFilters),
     queryFn: async (): Promise<CapabilityWithCounts[]> => {
       let query = supabase
         .from('capabilities')
@@ -40,9 +58,31 @@ export function useCapabilities(filters: CapabilityFilters = {}) {
         .order('priority', { ascending: true })
         .order('name', { ascending: true });
 
+      // Facility filtering
+      if (effectiveFacilityId) {
+        if (includeEnterprise) {
+          // Show facility-specific + enterprise capabilities
+          query = query.or(`facility_id.eq.${effectiveFacilityId},is_enterprise.eq.true`);
+        } else {
+          // Show only facility-specific capabilities
+          query = query.eq('facility_id', effectiveFacilityId);
+        }
+      } else if (filters.isEnterprise !== undefined) {
+        // Filter by enterprise flag when no facility selected
+        query = query.eq('is_enterprise', filters.isEnterprise);
+      }
+
+      // Mission filtering
+      if (filters.mission) {
+        query = query.eq('mission', filters.mission);
+      }
+
+      // Priority filtering
       if (filters.priority) {
         query = query.eq('priority', filters.priority);
       }
+
+      // Owner filtering
       if (filters.owner) {
         query = query.eq('owner', filters.owner);
       }
@@ -87,14 +127,22 @@ export function useCapability(id: string) {
 }
 
 // Create capability
+// Automatically assigns to current facility if not specified
 export function useCreateCapability() {
   const queryClient = useQueryClient();
+  const { currentFacilityId } = useFacilityStore();
 
   return useMutation({
     mutationFn: async (data: CapabilityInsert) => {
+      // Assign to current facility if not explicitly set and not enterprise
+      const insertData = {
+        ...data,
+        facility_id: data.facility_id !== undefined ? data.facility_id : (data.is_enterprise ? null : currentFacilityId),
+      };
+
       const { data: result, error } = await supabase
         .from('capabilities')
-        .insert(data)
+        .insert(insertData)
         .select()
         .single();
 

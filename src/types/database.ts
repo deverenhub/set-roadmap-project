@@ -23,6 +23,9 @@ export interface Database {
           owner: string | null;
           color: string | null;
           qol_impact: string | null;
+          facility_id: string | null;
+          is_enterprise: boolean;
+          mission: 'mission_1' | 'mission_2' | 'mission_3' | null;
           created_at: string;
           updated_at: string;
         };
@@ -36,6 +39,9 @@ export interface Database {
           owner?: string | null;
           color?: string | null;
           qol_impact?: string | null;
+          facility_id?: string | null;
+          is_enterprise?: boolean;
+          mission?: 'mission_1' | 'mission_2' | 'mission_3' | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -49,6 +55,9 @@ export interface Database {
           owner?: string | null;
           color?: string | null;
           qol_impact?: string | null;
+          facility_id?: string | null;
+          is_enterprise?: boolean;
+          mission?: 'mission_1' | 'mission_2' | 'mission_3' | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -72,6 +81,7 @@ export interface Database {
           start_date: string | null;
           end_date: string | null;
           notes: string | null;
+          facility_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -92,6 +102,7 @@ export interface Database {
           start_date?: string | null;
           end_date?: string | null;
           notes?: string | null;
+          facility_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -112,6 +123,7 @@ export interface Database {
           start_date?: string | null;
           end_date?: string | null;
           notes?: string | null;
+          facility_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -137,6 +149,7 @@ export interface Database {
           category: string | null;
           progress_percent: number;
           order: number;
+          facility_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -152,6 +165,7 @@ export interface Database {
           category?: string | null;
           progress_percent?: number;
           order?: number;
+          facility_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -167,6 +181,7 @@ export interface Database {
           category?: string | null;
           progress_percent?: number;
           order?: number;
+          facility_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -526,6 +541,7 @@ export interface Database {
           read_at: string | null;
           metadata: Json;
           created_at: string;
+          facility_id: string | null;
         };
         Insert: {
           id?: string;
@@ -540,6 +556,7 @@ export interface Database {
           read_at?: string | null;
           metadata?: Json;
           created_at?: string;
+          facility_id?: string | null;
         };
         Update: {
           id?: string;
@@ -554,6 +571,7 @@ export interface Database {
           read_at?: string | null;
           metadata?: Json;
           created_at?: string;
+          facility_id?: string | null;
         };
         Relationships: [
           {
@@ -566,6 +584,179 @@ export interface Database {
             foreignKeyName: 'notifications_actor_id_fkey';
             columns: ['actor_id'];
             referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      facilities: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          location_city: string | null;
+          location_state: string | null;
+          status: 'active' | 'planning' | 'onboarding' | 'inactive';
+          maturity_score: number;
+          description: string | null;
+          timezone: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          location_city?: string | null;
+          location_state?: string | null;
+          status?: 'active' | 'planning' | 'onboarding' | 'inactive';
+          maturity_score?: number;
+          description?: string | null;
+          timezone?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          location_city?: string | null;
+          location_state?: string | null;
+          status?: 'active' | 'planning' | 'onboarding' | 'inactive';
+          maturity_score?: number;
+          description?: string | null;
+          timezone?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      user_facilities: {
+        Row: {
+          id: string;
+          user_id: string;
+          facility_id: string;
+          role: 'viewer' | 'editor' | 'facility_admin';
+          is_primary: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          facility_id: string;
+          role?: 'viewer' | 'editor' | 'facility_admin';
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          facility_id?: string;
+          role?: 'viewer' | 'editor' | 'facility_admin';
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_facilities_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_facilities_facility_id_fkey';
+            columns: ['facility_id'];
+            referencedRelation: 'facilities';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      capability_templates: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          priority: string;
+          target_level: number;
+          owner: string | null;
+          qol_impact: string | null;
+          color: string | null;
+          is_enterprise: boolean;
+          category: 'operations' | 'technology' | 'process' | null;
+          mission: 'mission_1' | 'mission_2' | 'mission_3' | null;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          priority?: string;
+          target_level?: number;
+          owner?: string | null;
+          qol_impact?: string | null;
+          color?: string | null;
+          is_enterprise?: boolean;
+          category?: 'operations' | 'technology' | 'process' | null;
+          mission?: 'mission_1' | 'mission_2' | 'mission_3' | null;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          priority?: string;
+          target_level?: number;
+          owner?: string | null;
+          qol_impact?: string | null;
+          color?: string | null;
+          is_enterprise?: boolean;
+          category?: 'operations' | 'technology' | 'process' | null;
+          mission?: 'mission_1' | 'mission_2' | 'mission_3' | null;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      capability_facility_progress: {
+        Row: {
+          id: string;
+          capability_id: string;
+          facility_id: string;
+          current_level: number;
+          notes: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          capability_id: string;
+          facility_id: string;
+          current_level?: number;
+          notes?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          capability_id?: string;
+          facility_id?: string;
+          current_level?: number;
+          notes?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'capability_facility_progress_capability_id_fkey';
+            columns: ['capability_id'];
+            referencedRelation: 'capabilities';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'capability_facility_progress_facility_id_fkey';
+            columns: ['facility_id'];
+            referencedRelation: 'facilities';
             referencedColumns: ['id'];
           }
         ];

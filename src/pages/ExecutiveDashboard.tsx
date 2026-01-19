@@ -1,7 +1,7 @@
 // src/pages/ExecutiveDashboard.tsx
 // Leadership Executive Dashboard - A storytelling view for stakeholders
 import { useState, useMemo } from 'react';
-import { useCapabilities, useMilestones, useQuickWins } from '@/hooks';
+import { useCapabilities, useMilestones, useQuickWins, usePermissions } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,8 +40,10 @@ import {
   Layers,
   FileText,
   Info,
+  Building2,
 } from 'lucide-react';
 import { PDFExportButton } from '@/components/reports';
+import { CrossFacilityView } from '@/components/executive';
 import { format, startOfQuarter, getQuarter, getYear, addQuarters, isAfter, isBefore } from 'date-fns';
 
 // Health Status Types
@@ -58,7 +60,8 @@ export default function ExecutiveDashboard() {
   const { data: capabilities, isLoading: loadingCaps } = useCapabilities();
   const { data: milestones, isLoading: loadingMs } = useMilestones();
   const { data: quickWins, isLoading: loadingQw } = useQuickWins();
-  const [selectedView, setSelectedView] = useState<'overview' | 'timeline' | 'impact'>('overview');
+  const { isAdmin } = usePermissions();
+  const [selectedView, setSelectedView] = useState<'overview' | 'timeline' | 'impact' | 'enterprise'>('overview');
 
   const isLoading = loadingCaps || loadingMs || loadingQw;
 
@@ -559,7 +562,7 @@ CAPABILITIES
 
       {/* Main Content Tabs */}
       <Tabs value={selectedView} onValueChange={(v) => setSelectedView(v as any)} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[500px]">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4 lg:w-[650px]' : 'grid-cols-3 lg:w-[500px]'}`}>
           <TabsTrigger value="overview" className="gap-2">
             <PieChartIcon className="h-4 w-4" />
             Overview
@@ -570,8 +573,14 @@ CAPABILITIES
           </TabsTrigger>
           <TabsTrigger value="impact" className="gap-2">
             <Activity className="h-4 w-4" />
-            Impact Analysis
+            Impact
           </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="enterprise" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              Enterprise
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Overview Tab */}
@@ -909,6 +918,13 @@ CAPABILITIES
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Enterprise Tab - Cross-facility view for admins */}
+        {isAdmin && (
+          <TabsContent value="enterprise" className="space-y-6">
+            <CrossFacilityView />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

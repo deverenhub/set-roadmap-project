@@ -23,6 +23,8 @@ import {
   ChevronDown,
   Presentation,
   History,
+  Building2,
+  FileStack,
 } from 'lucide-react';
 import { SETLogoIcon } from '@/components/ui/SETLogo';
 import { cn } from '@/lib/utils';
@@ -30,9 +32,10 @@ import { Button } from '@/components/ui/button';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { NotificationBell } from '@/components/notifications';
 import { GlobalSearch } from '@/components/search';
+import { FacilitySelector, FacilitySelectorCompact, FacilityBadge } from './FacilitySelector';
 import { useChatStore } from '@/stores/chatStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useSignOut, useCurrentUser } from '@/hooks';
+import { useSignOut, useCurrentUser, useFacilityInit, usePermissions } from '@/hooks';
 import {
   Tooltip,
   TooltipContent,
@@ -49,6 +52,7 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   children?: NavItem[];
+  adminOnly?: boolean;
 }
 
 const navigation: NavItem[] = [
@@ -72,6 +76,8 @@ const navigation: NavItem[] = [
   { name: 'Dependencies', href: '/dependencies', icon: GitBranch },
   { name: 'Quick Wins', href: '/quick-wins', icon: Zap },
   { name: 'Activity Log', href: '/activity-log', icon: History },
+  { name: 'Facilities', href: '/facilities', icon: Building2, adminOnly: true },
+  { name: 'Templates', href: '/templates', icon: FileStack, adminOnly: true },
 ];
 
 export function MainLayout({ children }: MainLayoutProps) {
@@ -80,10 +86,17 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
   const { data: user } = useCurrentUser();
   const signOut = useSignOut();
+  const { isAdmin } = usePermissions();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>(
     location.pathname.startsWith('/roadmap') ? 'Roadmaps' : null
   );
+
+  // Initialize facility store with user's facilities
+  useFacilityInit();
+
+  // Filter navigation based on user permissions
+  const filteredNavigation = navigation.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <TooltipProvider>
@@ -100,7 +113,8 @@ export function MainLayout({ children }: MainLayoutProps) {
           </Button>
           <div className="flex items-center gap-2">
             <SETLogoIcon size={24} className="text-[#EB0A1E]" />
-            <span className="font-semibold text-white">SET VPC Roadmap</span>
+            <span className="font-semibold text-white">SET VPC</span>
+            <FacilityBadge />
           </div>
           <div className="ml-auto flex items-center gap-1">
             <GlobalSearch className="text-gray-400 hover:text-white hover:bg-set-teal-900 border-set-teal-800" />
@@ -135,8 +149,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             <SETLogoIcon size={24} className="text-[#EB0A1E]" />
             <span className="font-semibold text-white">SET VPC Roadmap</span>
           </div>
+          <div className="px-4 py-3 border-b border-set-teal-800">
+            <FacilitySelector className="w-full" showLocation={false} />
+          </div>
           <nav className="p-4 space-y-1">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href ||
                 (item.href !== '/' && location.pathname.startsWith(item.href));
 
@@ -222,13 +239,16 @@ export function MainLayout({ children }: MainLayoutProps) {
           )}>
             <SETLogoIcon size={24} className="text-[#EB0A1E] shrink-0" />
             {!sidebarCollapsed && (
-              <span className="font-semibold truncate text-white">SET VPC Roadmap</span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold truncate text-white text-sm">SET VPC Roadmap</span>
+                <FacilityBadge className="w-fit" />
+              </div>
             )}
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href ||
                 (item.href !== '/' && location.pathname.startsWith(item.href));
 
@@ -453,7 +473,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           )}
         >
           {/* Desktop top header */}
-          <header className="hidden lg:flex sticky top-0 z-20 h-14 items-center justify-end gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+          <header className="hidden lg:flex sticky top-0 z-20 h-14 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+            <FacilitySelector showLocation />
+            <div className="flex-1" />
             <GlobalSearch />
             <NotificationBell />
             <Button

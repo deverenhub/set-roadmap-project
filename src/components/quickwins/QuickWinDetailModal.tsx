@@ -66,7 +66,7 @@ export function QuickWinDetailModal({
   onOpenChange,
   onEdit,
 }: QuickWinDetailModalProps) {
-  const { data: quickWin, isLoading } = useQuickWin(quickWinId || '');
+  const { data: quickWin, isLoading } = useQuickWin(quickWinId);
   const deleteQuickWin = useDeleteQuickWin();
   const { canEdit } = usePermissions();
 
